@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>全流程與視覺整理 · M8 桌機預覽（狀態機泳道／跨案總覽／樣式庫／權限矩陣／用語表／無障礙）</title>
+<style>
+  :root{
+    --bg:#F6F4EF; --surface:#FFFFFF; --surface-2:#FCFBF8;
+    --ink:#2B2A26; --ink-soft:#6C695F; --ink-faint:#737060;
+    --line:#E7E3DA; --line-strong:#D8D3C7;
+    --accent:#5E6E40; --accent-ink:#43512C; --accent-soft:#ECEFE1;
+    --action:#96591A; --action-soft:#FBF2E1;
+    --guard:#9E4A4A; --guard-soft:#F7E9E7;
+    --info:#4A6B7C; --info-soft:#E6EEF2;
+    --shadow:0 1px 2px rgba(43,42,38,.04),0 8px 24px rgba(43,42,38,.06);
+    --shadow-lg:0 2px 6px rgba(43,42,38,.06),0 18px 48px rgba(43,42,38,.10);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#1E1C18; --surface:#282621; --surface-2:#2E2B25;
+      --ink:#ECE8DF; --ink-soft:#ABA595; --ink-faint:#9A9484;
+      --line:#38352D; --line-strong:#454137;
+      --accent:#AFC084; --accent-ink:#C7D5A2; --accent-soft:#2C3122;
+      --action:#DDA75C; --action-soft:#322718;
+      --guard:#D68B8B; --guard-soft:#331F1F;
+      --info:#9CBCCB; --info-soft:#1F2A30;
+      --shadow:0 1px 2px rgba(0,0,0,.2),0 10px 30px rgba(0,0,0,.28);
+      --shadow-lg:0 2px 6px rgba(0,0,0,.28),0 22px 54px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#F6F4EF; --surface:#FFFFFF; --surface-2:#FCFBF8;
+    --ink:#2B2A26; --ink-soft:#6C695F; --ink-faint:#737060;
+    --line:#E7E3DA; --line-strong:#D8D3C7;
+    --accent:#5E6E40; --accent-ink:#43512C; --accent-soft:#ECEFE1;
+    --action:#96591A; --action-soft:#FBF2E1;
+    --guard:#9E4A4A; --guard-soft:#F7E9E7;
+    --info:#4A6B7C; --info-soft:#E6EEF2;
+    --shadow:0 1px 2px rgba(43,42,38,.04),0 8px 24px rgba(43,42,38,.06);
+    --shadow-lg:0 2px 6px rgba(43,42,38,.06),0 18px 48px rgba(43,42,38,.10);
+  }
+  :root[data-theme="dark"]{
+    --bg:#1E1C18; --surface:#282621; --surface-2:#2E2B25;
+    --ink:#ECE8DF; --ink-soft:#ABA595; --ink-faint:#9A9484;
+    --line:#38352D; --line-strong:#454137;
+    --accent:#AFC084; --accent-ink:#C7D5A2; --accent-soft:#2C3122;
+    --action:#DDA75C; --action-soft:#322718;
+    --guard:#D68B8B; --guard-soft:#331F1F;
+    --info:#9CBCCB; --info-soft:#1F2A30;
+    --shadow:0 1px 2px rgba(0,0,0,.2),0 10px 30px rgba(0,0,0,.28);
+    --shadow-lg:0 2px 6px rgba(0,0,0,.28),0 22px 54px rgba(0,0,0,.4);
+  }
+  /* 無障礙修正已於 2026-07-25 全面套用（M0–M8 九頁）：
+       淺色 --ink-faint #9C988C→#737060、--action #A96A22→#96591A
+       深色 --ink-faint #7C7768→#9A9484
+     下列 data-a11y="legacy" 僅供第 6 區「修正前配色對照」即時預覽，不是正式配色 */
+  :root[data-a11y="legacy"]{ --ink-faint:#9C988C; --action:#A96A22; }
+  :root[data-a11y="legacy"][data-theme="dark"]{ --ink-faint:#7C7768; --action:#DDA75C; }
+  @media (prefers-color-scheme:dark){
+    :root[data-a11y="legacy"]:not([data-theme="light"]){ --ink-faint:#7C7768; --action:#DDA75C; }
+  }
+
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    font-family:"PingFang TC","Noto Sans TC","Heiti TC",system-ui,-apple-system,"Segoe UI",sans-serif;
+    background:var(--bg); color:var(--ink); line-height:1.7; -webkit-font-smoothing:antialiased; min-height:100vh;
+  }
+  .mono{font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace}
+  a{color:var(--accent-ink)}
+
+  .demo-strip{background:var(--action-soft);border-bottom:1px solid color-mix(in srgb,var(--action) 35%,transparent);
+    color:var(--action);font-size:12.5px;font-weight:600;padding:8px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px}
+  .demo-strip .tools{display:flex;gap:6px}
+  .tbtn{font-size:12px;border:1px solid color-mix(in srgb,var(--action) 30%,transparent);background:transparent;color:var(--action);
+    border-radius:7px;padding:3px 9px;cursor:pointer;font-family:inherit}
+  .tbtn:hover{background:var(--surface)}
+  .dot{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block}
+
+  .internal-strip{background:var(--guard-soft);border-bottom:1px solid color-mix(in srgb,var(--guard) 32%,transparent);
+    color:var(--guard);font-size:12.5px;font-weight:700;padding:7px 20px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+
+  .msnav{max-width:1360px;margin:0 auto;padding:14px 22px 0;display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .msnav a,.msnav span.here{font-size:12.5px;text-decoration:none;border-radius:8px;padding:5px 11px;border:1px solid var(--line);
+    background:var(--surface);color:var(--ink-soft);font-weight:600}
+  .msnav a:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .msnav span.here{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+  .msnav .sep{color:var(--ink-faint);font-size:12px}
+
+  /* 全站統一 focus 樣式（無障礙） */
+  a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
+    outline:2.5px solid var(--accent); outline-offset:2px; border-radius:6px;
+  }
+
+  .shell{max-width:1360px;margin:0 auto;padding:18px 22px 60px}
+  h1{font-size:clamp(23px,3vw,30px);font-weight:800;letter-spacing:-.01em;margin:.15em 0 .2em}
+  .lede{color:var(--ink-soft);font-size:14.5px;margin:0 0 8px;max-width:86ch}
+  .tagrow{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 2px}
+  .tag{font-family:ui-monospace,Menlo,monospace;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px;background:var(--accent-soft);color:var(--accent-ink)}
+  .tag.act{background:var(--action-soft);color:var(--action)}
+  .tag.gd{background:var(--guard-soft);color:var(--guard)}
+  .tag.inf{background:var(--info-soft);color:var(--info)}
+
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);padding:20px 22px;margin-top:16px}
+  .card h2{font-size:16px;font-weight:800;margin:0 0 4px;color:var(--accent-ink)}
+  .card h2 .n{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:11px;background:var(--accent-soft);color:var(--accent-ink);
+    border-radius:6px;padding:2px 7px;margin-right:7px;vertical-align:2px}
+  .card .sub{font-size:12.5px;color:var(--ink-faint);margin:0 0 14px}
+  .card h3.sec{font-size:13px;font-weight:800;margin:18px 0 8px;color:var(--ink)}
+
+  .minibtn{font-family:inherit;font-size:12px;font-weight:700;border:1.5px solid var(--line-strong);background:var(--surface);
+    color:var(--ink-soft);border-radius:9px;padding:6px 12px;cursor:pointer}
+  .minibtn:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .minibtn.solid{background:var(--accent);border-color:var(--accent);color:#fff}
+  :root[data-theme="dark"] .minibtn.solid{color:#20241a}
+  .minibtn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-ink)}
+  .minibtn.act{background:var(--action-soft);border-color:color-mix(in srgb,var(--action) 45%,transparent);color:var(--action)}
+  .minibtn.danger{border-color:color-mix(in srgb,var(--guard) 40%,transparent);color:var(--guard)}
+  .minibtn:disabled{opacity:.42;cursor:not-allowed}
+  .btnrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px}
+
+  .badge{display:inline-block;font-family:ui-monospace,Menlo,monospace;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+  .badge.pass{background:var(--accent-soft);color:var(--accent-ink)}
+  .badge.block{background:var(--guard-soft);color:var(--guard)}
+  .badge.inv{background:var(--info-soft);color:var(--info)}
+  .badge.act{background:var(--action-soft);color:var(--action)}
+  .badge.mute{background:var(--surface-2);color:var(--ink-faint);border:1px solid var(--line)}
+
+  table.tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+  table.tbl th{text-align:left;font-size:11px;color:var(--ink-faint);border-bottom:1.5px solid var(--line-strong);padding:7px 8px;white-space:nowrap;font-weight:700}
+  table.tbl td{border-bottom:1px solid var(--line);padding:8px;vertical-align:top}
+  table.tbl tr:last-child td{border-bottom:none}
+  table.tbl td.mono,table.tbl th.mono{font-family:ui-monospace,Menlo,monospace;font-size:11px}
+  table.tbl td.num,table.tbl th.num{text-align:right;font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+  table.tbl tr.sumrow td{background:var(--surface-2);font-weight:800}
+  .tblwrap{overflow-x:auto}
+
+  /* ---------- 泳道圖 ---------- */
+  .swimwrap{overflow-x:auto;border:1px solid var(--line);border-radius:15px;background:var(--surface-2);padding:12px 14px}
+  .lane{display:grid;align-items:center;gap:8px;margin-bottom:9px;min-width:max-content}
+  .lane:last-child{margin-bottom:0}
+  .lanelabel{font-size:11.5px;font-weight:800;color:var(--ink-soft);background:var(--surface);border:1px solid var(--line);
+    border-radius:10px;padding:8px 10px;width:132px;position:sticky;left:0;z-index:2;line-height:1.4}
+  .lanelabel small{display:block;font-family:ui-monospace,Menlo,monospace;font-size:9px;color:var(--ink-faint);font-weight:600}
+  .snode{border:1.5px solid var(--line-strong);background:var(--surface);border-radius:11px;padding:7px 9px;cursor:pointer;
+    font-family:ui-monospace,Menlo,monospace;font-size:10px;font-weight:700;color:var(--ink-soft);text-align:left;line-height:1.4;
+    min-width:132px;max-width:150px}
+  .snode:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .snode .zh{display:block;font-family:"PingFang TC","Noto Sans TC",sans-serif;font-size:11px;color:var(--ink);font-weight:700;margin-top:2px}
+  .snode.cur{border-color:var(--action);background:var(--action-soft);color:var(--action);box-shadow:0 0 0 3px color-mix(in srgb,var(--action) 16%,transparent)}
+  .snode.cur .zh{color:var(--action)}
+  .snode.term{border-style:dashed;background:var(--surface-2)}
+  .snode.bad{border-color:color-mix(in srgb,var(--guard) 45%,transparent);background:var(--guard-soft);color:var(--guard)}
+  .snode.bad .zh{color:var(--guard)}
+  .snode.sel{border-color:var(--info);background:var(--info-soft);color:var(--info)}
+  .snode.sel .zh{color:var(--info)}
+  .snode .cr{display:block;font-size:9px;font-weight:700;margin-top:3px;color:var(--accent-ink)}
+  .smtabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+  .detail{border:1.5px dashed var(--info);background:var(--info-soft);border-radius:14px;padding:13px 15px;margin-top:13px;font-size:12.5px;color:var(--ink)}
+  .detail h4{margin:0 0 3px;font-size:14px;font-weight:800;color:var(--info)}
+  .detail .code{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--ink-faint);margin-bottom:9px}
+  .nexts{display:flex;flex-wrap:wrap;gap:7px;margin:7px 0 4px}
+  .nx{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:700;border-radius:8px;padding:4px 9px;background:var(--surface);
+    border:1px solid var(--line-strong);color:var(--ink-soft);cursor:pointer}
+  .nx:hover{border-color:var(--accent);color:var(--accent-ink)}
+  .nx.bad{background:var(--guard-soft);border-color:color-mix(in srgb,var(--guard) 40%,transparent);color:var(--guard)}
+  .nx.back{background:var(--action-soft);border-color:color-mix(in srgb,var(--action) 40%,transparent);color:var(--action)}
+
+  /* ---------- KPI ---------- */
+  .stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:13px}
+  .stats.n8{grid-template-columns:repeat(8,minmax(0,1fr))}
+  .sbox{border:1px solid var(--line);border-radius:12px;padding:10px 12px;background:var(--surface-2)}
+  .sbox .sl{font-size:11px;color:var(--ink-faint);line-height:1.4}
+  .sbox .sk{font-family:ui-monospace,Menlo,monospace;font-size:9px;color:var(--ink-faint);line-height:1.4}
+  .sbox .sv{font-size:19px;font-weight:800;color:var(--accent-ink)}
+  .sbox .sv small{font-size:11px;font-weight:700;color:var(--ink-faint)}
+  .sbox.warn{background:var(--guard-soft);border-color:color-mix(in srgb,var(--guard) 30%,transparent)}
+  .sbox.warn .sv{color:var(--guard)}
+  .sbox.hi{background:var(--accent-soft);border-color:var(--accent)}
+
+  .groupbox{border:1px solid var(--line);border-radius:14px;background:var(--surface-2);padding:12px 14px;margin-bottom:11px}
+  .groupbox h4{margin:0 0 7px;font-size:12.5px;font-weight:800;color:var(--ink)}
+  .groupbox h4 .cnt{font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-faint);margin-left:6px}
+
+  /* ---------- 樣式庫 ---------- */
+  .statedemo{border:1.5px solid var(--line-strong);border-radius:15px;background:var(--surface-2);padding:18px;min-height:210px;
+    display:flex;align-items:center;justify-content:center}
+  .empty-st{text-align:center;color:var(--ink-soft);max-width:44ch}
+  .empty-st .icon{font-size:30px;opacity:.55}
+  .empty-st h4{margin:8px 0 4px;font-size:14px;font-weight:800;color:var(--ink)}
+  .empty-st p{margin:0 0 11px;font-size:12.5px;line-height:1.65}
+  .skel{width:100%}
+  .skrow{height:13px;border-radius:7px;margin-bottom:9px;
+    background:linear-gradient(90deg,var(--line) 25%,var(--surface) 37%,var(--line) 63%);
+    background-size:400% 100%;animation:sh 1.4s ease infinite}
+  @keyframes sh{0%{background-position:100% 50%}100%{background-position:0 50%}}
+  .errbox{width:100%;border:1.5px solid color-mix(in srgb,var(--guard) 45%,transparent);background:var(--guard-soft);border-radius:14px;padding:15px 17px}
+  .errbox h4{margin:0 0 6px;font-size:13.5px;font-weight:800;color:var(--guard)}
+  .errbox ul{margin:6px 0 0;padding-left:19px;font-size:12.5px;color:var(--guard);line-height:1.7}
+  .errbox .fldline{background:var(--surface);border:1.5px solid var(--guard);border-radius:9px;padding:7px 10px;font-size:12.5px;margin-top:9px;color:var(--ink)}
+  .okstate{text-align:center}
+  .okstate .icon{width:52px;height:52px;border-radius:50%;background:var(--accent-soft);color:var(--accent-ink);border:2px solid var(--accent);
+    display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:800;margin:0 auto 10px}
+  .okstate h4{margin:0 0 4px;font-size:15px;font-weight:800;color:var(--accent-ink)}
+  .okstate p{margin:0;font-size:12.5px;color:var(--ink-soft)}
+  .okstate .rid{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:var(--accent-soft);color:var(--accent-ink);
+    padding:3px 10px;border-radius:8px;display:inline-block;margin-top:9px}
+
+  /* ---------- 權限矩陣 ---------- */
+  .permtable td.c{text-align:center;font-size:13px;white-space:nowrap}
+  .permtable tr.hl td{background:var(--accent-soft)}
+  .permtable td.res{font-size:12px}
+  .permtable td.res small{display:block;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:var(--ink-faint)}
+  .permtable tr.ext td.res{border-left:3px solid var(--accent)}
+  .permtable tr.int td.res{border-left:3px solid var(--guard)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--ink-soft);margin:9px 0 2px}
+  .legend b{color:var(--ink)}
+
+  .term td.a{font-weight:800;color:var(--ink)}
+  .term td.no{color:var(--guard);font-size:12px}
+
+  /* ---------- 無障礙 ---------- */
+  .a11y li{margin-bottom:7px}
+  .cklist{list-style:none;margin:0;padding:0}
+  .cklist li{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;background:var(--surface-2);padding:10px 13px;margin-bottom:8px}
+  .cklist li .ic{font-size:15px;line-height:1.4;width:20px;flex:none;text-align:center}
+  .cklist li.ok{border-color:color-mix(in srgb,var(--accent) 45%,transparent);background:var(--accent-soft)}
+  .cklist li.no{border-color:color-mix(in srgb,var(--guard) 35%,transparent);background:var(--guard-soft)}
+  .cklist li.part{border-color:color-mix(in srgb,var(--action) 40%,transparent);background:var(--action-soft)}
+  .cklist li .t{font-size:12.5px;font-weight:800;color:var(--ink)}
+  .cklist li.no .t{color:var(--guard)}
+  .cklist li.part .t{color:var(--action)}
+  .cklist li.ok .t{color:var(--accent-ink)}
+  .cklist li .d{font-size:11.5px;color:var(--ink-soft);line-height:1.55}
+  .cklist li .d code{font-family:ui-monospace,Menlo,monospace;font-size:10.5px}
+  .swatch{display:inline-block;width:13px;height:13px;border-radius:4px;border:1px solid var(--line-strong);vertical-align:-2px;margin-right:5px}
+  .kbdemo{border:1.5px dashed var(--line-strong);border-radius:14px;padding:14px 16px;background:var(--surface-2)}
+  kbd{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:var(--surface);border:1px solid var(--line-strong);
+    border-bottom-width:2px;border-radius:6px;padding:1.5px 6px;color:var(--ink)}
+
+  /* ---------- 導航地圖 ---------- */
+  .mapgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .mapcard{display:block;text-decoration:none;border:1.5px solid var(--line-strong);border-radius:15px;background:var(--surface-2);padding:13px 15px;color:inherit}
+  .mapcard:hover{border-color:var(--accent);box-shadow:var(--shadow)}
+  .mapcard .m{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;font-weight:800;color:var(--accent-ink);
+    background:var(--accent-soft);border-radius:6px;padding:1px 7px;display:inline-block}
+  .mapcard.ext .m{background:var(--info-soft);color:var(--info)}
+  .mapcard h4{margin:7px 0 3px;font-size:14px;font-weight:800;color:var(--ink)}
+  .mapcard p{margin:0;font-size:11.5px;color:var(--ink-soft);line-height:1.6}
+  .mapcard .who{display:inline-block;font-size:10.5px;font-weight:700;padding:1.5px 7px;border-radius:5px;margin-top:8px}
+  .mapcard .who.pub{background:var(--info-soft);color:var(--info)}
+  .mapcard .who.int{background:var(--guard-soft);color:var(--guard)}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:var(--ink);color:var(--bg);
+    font-size:13px;font-weight:700;padding:10px 18px;border-radius:11px;box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:all .25s;z-index:60;max-width:76vw;text-align:center}
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+  .toast.bad{background:var(--guard);color:#fff}
+
+  footer.foot{max-width:1360px;margin:0 auto;padding:8px 22px 50px;color:var(--ink-faint);font-size:12.5px}
+  footer.foot code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 9px;border-radius:20px;background:var(--accent-soft);color:var(--accent-ink);margin:0 4px 4px 0}
+  .pill.out{background:var(--action-soft);color:var(--action)}
+  .pill.guard{background:var(--guard-soft);color:var(--guard)}
+  .role-callout{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:12px 15px;font-size:12.5px;color:var(--ink-soft);margin-top:16px;line-height:1.65}
+  .role-callout code{font-family:ui-monospace,Menlo,monospace;font-size:11px;background:var(--accent-soft);color:var(--accent-ink);padding:1px 5px;border-radius:4px}
+  .role-callout b{color:var(--ink)}
+  .guardbox{background:var(--guard-soft);border:1px solid color-mix(in srgb,var(--guard) 28%,transparent);border-radius:12px;
+    padding:12px 15px;font-size:12.5px;color:var(--guard);margin-top:14px;line-height:1.65}
+  .guardbox b{font-weight:800}
+  .guardbox code{font-family:ui-monospace,Menlo,monospace;font-size:11px}
+  .notebox{background:var(--info-soft);border:1px solid color-mix(in srgb,var(--info) 28%,transparent);border-radius:12px;
+    padding:12px 15px;font-size:12.5px;color:var(--info);margin-top:13px;line-height:1.65}
+  .notebox b{font-weight:800}
+  .notebox code{font-family:ui-monospace,Menlo,monospace;font-size:11px}
+  .okbox{background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:12px;
+    padding:12px 15px;font-size:12.5px;color:var(--accent-ink);margin-top:13px;line-height:1.65}
+  .okbox b{font-weight:800}
+  .okbox code{font-family:ui-monospace,Menlo,monospace;font-size:11px}
+</style>
+</head>
+<body>
+
+<div class="demo-strip">
+  <span><span class="dot"></span> 展示版 · 供同事預覽 · M8 全流程與視覺整理 · FEATURE_SANDBOX 靜態預覽（可點按 · 純前端示意 · 不連後端／不寫入）</span>
+  <span class="tools">
+    <button class="tbtn" onclick="document.documentElement.setAttribute('data-theme','light')">☀ 淺色</button>
+    <button class="tbtn" onclick="document.documentElement.setAttribute('data-theme','dark')">☾ 深色</button>
+    <button class="tbtn" onclick="document.documentElement.removeAttribute('data-theme')">⚙ 系統</button>
+  </span>
+</div>
+
+<div class="internal-strip">
+  <span>🔒 對內頁面 · 需登入 · 提案方與受邀 KOL 看不到此頁</span>
+  <span style="font-weight:600;opacity:.85;font-size:12px">目前登入（示意）：內部人員 <span class="mono">Users.id = U-101 · 企劃 · 企劃 A</span></span>
+</div>
+
+<nav class="msnav" aria-label="里程碑導覽">
+  <a href="PROMOTION_UI_M1_PREVIEW.html">M1 雙入口首頁</a>
+  <span class="sep">›</span>
+  <a href="PROMOTION_UI_M2_PREVIEW.html">M2 需求表單</a>
+  <span class="sep">›</span>
+  <a href="PROMOTION_UI_M3_PREVIEW.html">M3 內部審核與建案</a>
+  <span class="sep">›</span>
+  <a href="PROMOTION_UI_M4_PREVIEW.html">M4 KOL 媒合</a>
+  <span class="sep">›</span>
+  <a href="PROMOTION_UI_M5_PREVIEW.html">M5 邀約與報價</a>
+  <span class="sep">›</span>
+  <a href="PROMOTION_UI_M6_PREVIEW.html">M6 任務與外包工單</a>
+  <span class="sep">›</span>
+  <a href="PROMOTION_UI_M7_PREVIEW.html">M7 上架·成效·財務結案</a>
+  <span class="sep">›</span>
+  <span class="here">M8 全流程與視覺整理</span>
+  <span class="sep">·</span>
+  <a href="PROMOTION_UI_M0_WIREFRAME.html">M0 線稿</a>
+</nav>
+
+<div class="shell">
+  <h1>全流程與視覺整理</h1>
+  <p class="lede">整套推廣合作系統的<b>總圖</b>：三個狀態機怎麼走、範例案 A案現在卡在哪、跨案件現在有幾件事在等人、
+  空／載入／錯誤／成功四種狀態長什麼樣、五種角色各自看得到什麼、名詞怎麼統一講、無障礙有沒有及格。<b>這一頁不做業務動作，只做整理與檢查。</b></p>
+  <div class="tagrow">
+    <span class="tag">INTERNAL_ONLY = TRUE</span>
+    <span class="tag inf">STATE_MACHINES = Request／Project／Match 三套</span>
+    <span class="tag act">SOFT_STATE_ONLY = 暫停／取消／退回一律改狀態，不 deleteRow</span>
+    <span class="tag gd">PUBLIC_PAGE_NO_INTERNAL_FEATURE = TRUE</span>
+    <span class="tag">FRONTEND_PREVIEW = M0–M8 全數完成</span>
+    <span class="tag gd">PRODUCTION_DEPLOYMENT = NOT_AUTHORIZED</span>
+  </div>
+
+  <!-- ============ 1. 全流程狀態視覺 ============ -->
+  <div class="card">
+    <h2><span class="n">1</span>全流程狀態視覺（三個狀態機 · 泳道圖）</h2>
+    <p class="sub">泳道＝<b>誰在動</b>；節點＝狀態；橘色框＝<b>範例案 A案（PROMO-TEST-PRJ-001）目前位置</b>。點任一節點看「這個狀態允許往哪走、誰能操作、會不會扣額度」。</p>
+
+    <div class="smtabs">
+      <button class="minibtn on" id="tabREQ" onclick="showSM('REQ')">PromotionRequest 需求單</button>
+      <button class="minibtn" id="tabPRJ" onclick="showSM('PRJ')">PromotionProject 案件</button>
+      <button class="minibtn" id="tabMAT" onclick="showSM('MAT')">PromotionMatch 單一 KOL 配對</button>
+      <span style="font-size:11.5px;color:var(--ink-faint)">橫向可捲動 · 虛線框＝終態 · 紅框＝負向終態</span>
+    </div>
+
+    <div class="swimwrap" id="swim"></div>
+    <div id="smDetail"></div>
+
+    <div class="guardbox">
+      <b>三條共通鐵則</b><br>
+      1. <b>退回補件不是失敗</b>——<code>NEEDS_MORE_INFO</code> 會把球丟回提案方，補完可再回 <code>UNDER_REVIEW</code>，<b>同一張需求單</b>來回，不另開新單。<br>
+      2. <b>暫停／取消一律 soft</b>——<code>ON_HOLD</code> / <code>CANCELLED</code> / <code>REJECTED</code> / <code>DECLINED</code> 全部只改狀態欄，
+      <b>不得 deleteRow</b>；歷史列保留、可稽核、可還原判斷依據。<br>
+      3. <b>先問 KOL 再談條件</b>——案件必須走完 <code>KOL_INVITATION → WAITING_FOR_QUOTES → QUOTE_REVIEW</code> 才進
+      <code>COLLABORATION_CONFIRMATION</code>；<b>不得先向提案方報固定總價再問 KOL</b>。
+    </div>
+  </div>
+
+  <!-- ============ 2. 總覽 Dashboard ============ -->
+  <div class="card">
+    <h2><span class="n">2</span>跨案件總覽 Dashboard</h2>
+    <p class="sub">一頁看完「現在有幾件事在等人」。所有數字皆為<b>即時計算</b>；虛構示範資料共 7 件案件、3 張需求單。</p>
+
+    <div class="stats n8">
+      <div class="sbox hi"><div class="sl">進行中案件</div><div class="sk">非 COMPLETED／CANCELLED</div><div class="sv" id="kActive">0</div></div>
+      <div class="sbox"><div class="sl">待審需求</div><div class="sk">SUBMITTED／UNDER_REVIEW</div><div class="sv" id="kReview">0</div></div>
+      <div class="sbox"><div class="sl">待補件</div><div class="sk">NEEDS_MORE_INFO</div><div class="sv" id="kMore">0</div></div>
+      <div class="sbox"><div class="sl">待邀約</div><div class="sk">KOL_SELECTION／KOL_INVITATION</div><div class="sv" id="kInvite">0</div></div>
+      <div class="sbox"><div class="sl">待報價回覆</div><div class="sk">WAITING_FOR_QUOTES</div><div class="sv" id="kQuote">0</div></div>
+      <div class="sbox"><div class="sl">待上架</div><div class="sk">deliverable 未上架</div><div class="sv" id="kPub">0</div></div>
+      <div class="sbox warn"><div class="sl">延遲件數</div><div class="sk">is_delayed</div><div class="sv" id="kLate">0</div></div>
+      <div class="sbox warn"><div class="sl">待回款／待付款</div><div class="sk">AR／AP outstanding</div><div class="sv" id="kMoney">0</div></div>
+    </div>
+
+    <div class="btnrow" style="margin-top:0;margin-bottom:12px">
+      <button class="minibtn on" id="grpBtnFlat" onclick="setGroup('FLAT')">案件清單</button>
+      <button class="minibtn" id="grpBtnWho" onclick="setGroup('WHO')">依「卡在誰」分組</button>
+      <span style="font-size:11.5px;color:var(--ink-faint)">「卡在誰」是<b>推導欄</b>：由狀態推出目前球在誰手上，不另存欄位。</span>
+    </div>
+
+    <div id="prjArea"></div>
+  </div>
+
+  <!-- ============ 3. 狀態樣式庫 ============ -->
+  <div class="card">
+    <h2><span class="n">3</span>狀態樣式庫（空／載入／錯誤／成功）</h2>
+    <p class="sub">同一塊區域，四種狀態各給實際樣式。切換觀看：這是<b>全系統共用的狀態語彙</b>，各頁不再各自發明。</p>
+
+    <div class="btnrow" style="margin-top:0;margin-bottom:12px">
+      <button class="minibtn on" id="stBtnEMPTY"   onclick="showState('EMPTY')">空狀態 EMPTY</button>
+      <button class="minibtn" id="stBtnLOADING" onclick="showState('LOADING')">載入中 LOADING</button>
+      <button class="minibtn" id="stBtnERROR"   onclick="showState('ERROR')">錯誤 ERROR（驗證失敗）</button>
+      <button class="minibtn" id="stBtnSUCCESS" onclick="showState('SUCCESS')">成功 SUCCESS</button>
+    </div>
+
+    <div class="statedemo" id="stateDemo" aria-live="polite"></div>
+
+    <div class="notebox">
+      <b>四種狀態的規則</b>：<br>
+      <b>空狀態</b>必須說「為什麼空」＋「下一步可以做什麼」，不可以只放一句「沒有資料」。<br>
+      <b>載入中</b>用骨架屏（skeleton）維持版面高度，避免內容跳動；<b>不做旋轉圈</b>以免看不出載入了什麼。<br>
+      <b>錯誤</b>必須指到<b>是哪一個欄位</b>、<b>為什麼被擋</b>、<b>怎麼修</b>——這是 M2／M3／M5／M6／M7 所有守門的統一表現方式。<br>
+      <b>成功</b>要給可追溯的 ID（需求編號／案件編號／工單編號），讓人能回頭查。
+    </div>
+  </div>
+
+  <!-- ============ 4. 權限與可見性矩陣 ============ -->
+  <div class="card">
+    <h2><span class="n">4</span>權限與可見性矩陣（5 種角色 × 各頁面／資料）</h2>
+    <p class="sub">點角色按鈕切換視角，會高亮該角色<b>實際看得到的列</b>。<b>對外頁面不得出現任何內部功能</b>——不是靠隱藏 UI，是後端就不回傳。</p>
+
+    <div class="btnrow" style="margin-top:0;margin-bottom:11px">
+      <button class="minibtn on" id="roleBtnALL" onclick="setRole('ALL')">全部角色</button>
+      <button class="minibtn" id="roleBtnREQUESTER" onclick="setRole('REQUESTER')">外部提案方</button>
+      <button class="minibtn" id="roleBtnKOL" onclick="setRole('KOL')">受邀 KOL</button>
+      <button class="minibtn" id="roleBtnMANAGER" onclick="setRole('MANAGER')">內部主管</button>
+      <button class="minibtn" id="roleBtnSTAFF" onclick="setRole('STAFF')">內部一般人員</button>
+      <button class="minibtn" id="roleBtnVENDOR" onclick="setRole('VENDOR')">外包廠商</button>
+    </div>
+
+    <div class="legend">
+      <span><b>✎</b> 可見且可操作</span>
+      <span><b>👁</b> 唯讀可見</span>
+      <span><b>◐</b> 只看得到自己的那一份</span>
+      <span><b>—</b> 完全不可見（後端不回傳）</span>
+    </div>
+
+    <div class="tblwrap">
+      <table class="tbl permtable">
+        <thead><tr>
+          <th style="min-width:230px">頁面／資料</th>
+          <th class="c">外部提案方<br><span class="mono" style="font-weight:400">REQUESTER_PARTNER</span></th>
+          <th class="c">受邀 KOL<br><span class="mono" style="font-weight:400">INVITED_KOL</span></th>
+          <th class="c">內部主管<br><span class="mono" style="font-weight:400">Users.id · MANAGER</span></th>
+          <th class="c">內部一般人員<br><span class="mono" style="font-weight:400">Users.id · STAFF</span></th>
+          <th class="c">外包廠商<br><span class="mono" style="font-weight:400">VENDOR</span></th>
+        </tr></thead>
+        <tbody id="permBody"></tbody>
+      </table>
+    </div>
+
+    <div class="guardbox">
+      <b>對外頁不得出現內部功能——四條實作要求</b><br>
+      1. <b>後端過濾，不是前端隱藏</b>——外部角色請求內部資料，後端直接不回傳（403／空集合），不是回傳後用 CSS 藏起來。<br>
+      2. <b>對外頁不放任何指向對內頁的連結</b>——M1／M2 上方的里程碑導覽已明確標示「展示導覽 · 僅預覽用 · 正式版不存在」。<br>
+      3. <b>外部角色沒有 <code>Users.id</code>、沒有登入、沒有 access_key</b>——他們是 <code>PromotionPartners.partner_id</code>，靠一次性連結或 Email 往返互動。<br>
+      4. <b>KOL 看不到別的 KOL</b>——報價、聯絡方式、成效、款項一律 <b>◐ 只看自己那一份</b>；候選名單與比價表<b>永不外露</b>。
+    </div>
+  </div>
+
+  <!-- ============ 5. 一致用語表 ============ -->
+  <div class="card">
+    <h2><span class="n">5</span>一致用語表（避免混稱）</h2>
+    <p class="sub">同一件事只准有一種講法。左邊是<b>對外／對內要說的詞</b>，右邊是<b>系統欄位</b>與<b>不要再說的詞</b>。</p>
+    <div class="tblwrap">
+      <table class="tbl term">
+        <thead><tr>
+          <th style="min-width:120px">正式稱謂</th><th class="mono">角色／enum</th><th class="mono">主檔與欄位</th>
+          <th>對外怎麼講</th><th>❌ 不要再說</th>
+        </tr></thead>
+        <tbody id="termBody"></tbody>
+      </table>
+    </div>
+    <div class="okbox">
+      <b>一句話記法</b>：<b>外部四角色</b>（提案方／受邀 KOL／品牌／外包廠商）一律 <code>PromotionPartners.partner_id</code>；
+      <b>內部同事</b>一律 <code>Users.id</code>。看到欄位裡是 <code>U-***</code> 就是自己人，看到 <code>KOL-*</code> / <code>PROMO-TEST-PTR-*</code> 就是外部合作方。
+      <b>兩套 ID 永不互換、永不混用。</b>
+    </div>
+  </div>
+
+  <!-- ============ 6. 無障礙基本檢查 ============ -->
+  <div class="card">
+    <h2><span class="n">6</span>無障礙基本檢查（自我檢查清單與實測結果）</h2>
+    <p class="sub">檢查範圍＝M0–M8 共用的設計系統。對比度為<b>實際計算</b>的 WCAG 2.1 相對亮度比值，非目測。</p>
+
+    <div class="okbox" style="margin-top:0;margin-bottom:14px">
+      <b>2026-07-25 無障礙修正配色已全面套用（M0–M8 九頁 · 淺色與深色兩套主題）</b><br>
+      淺色：<code>--ink-faint</code> <code>#9C988C → #737060</code>、<code>--action</code> <code>#A96A22 → #96591A</code>；
+      深色：<code>--ink-faint</code> <code>#7C7768 → #9A9484</code>。<br>
+      下表為<b>套用後重新實測</b>：兩套主題各 14 組承載文字的配色，<b>兩邊都是 AA 以上 14/14、FAIL 0、無「僅大字」項</b>。<br>
+      <span style="font-size:11.5px">註：淺色 <code>--ink-faint</code> 的核准值原為 <code>#767263</code>，實測發現它在<b>頁面底色</b> <code>--bg #F6F4EF</code> 上只有 <b>4.38:1</b>（頁尾、導覽分隔符會落在 AA 之下），
+      故往下微調 3 階為 <code>#737060</code>，使其在 surface／surface-2／bg 三種底色上全部 ≥ 4.5。此微調已回報並經核可。</span>
+    </div>
+
+    <h3 class="sec">A. 色彩對比實測（兩主題套用後重測 · 一般文字需 ≥ 4.5:1）</h3>
+    <div class="tblwrap">
+      <table class="tbl">
+        <thead><tr><th>用途</th><th class="mono">前景 / 背景</th><th class="num">對比值</th><th>判定</th><th>處置</th></tr></thead>
+        <tbody id="contrastBody"></tbody>
+      </table>
+    </div>
+
+    <div class="btnrow">
+      <button class="minibtn act" id="a11yBtn" onclick="toggleA11y()">切回修正前配色（對照觀看）</button>
+      <span style="font-size:11.5px;color:var(--ink-faint)">目前顯示＝<b>已修正配色（正式值）</b>。按鈕可暫時切回舊值對照視覺差異，
+      再按一次即還原；<b>只影響本頁預覽，不改動任何檔案</b>。</span>
+    </div>
+
+    <h3 class="sec">B. 自我檢查清單</h3>
+    <ul class="cklist a11y" id="a11yList"></ul>
+
+    <h3 class="sec">C. 鍵盤操作實測區（可直接用鍵盤試）</h3>
+    <div class="kbdemo">
+      <p style="margin:0 0 9px;font-size:12.5px;color:var(--ink-soft)">
+        按 <kbd>Tab</kbd> 依序進入下列元件，每一個都會出現<b>可見的 focus 外框</b>；按 <kbd>Enter</kbd> / <kbd>Space</kbd> 可觸發；
+        彈窗開啟後按 <kbd>Esc</kbd> 關閉（M3／M5／M6／M7 皆已實作）。
+      </p>
+      <div class="btnrow" style="margin-top:0">
+        <button class="minibtn" onclick="toast('鍵盤可觸發：按鈕 1')">可聚焦按鈕 1</button>
+        <button class="minibtn" onclick="toast('鍵盤可觸發：按鈕 2')">可聚焦按鈕 2</button>
+        <a class="minibtn" href="PROMOTION_UI_M7_PREVIEW.html" style="text-decoration:none">可聚焦連結（往 M7）</a>
+        <select class="minibtn" onchange="toast('已選擇：' + this.value)" aria-label="示範下拉選單">
+          <option>示範下拉選單</option><option>選項 A</option><option>選項 B</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="notebox">
+      <b>本頁沒有做（誠實揭露）</b>：未跑螢幕報讀器（VoiceOver／NVDA）實測、未做完整 <code>aria-*</code> 標註稽核、
+      未驗證 200% 放大與 400% 重排（<code>MOBILE = OUT_OF_SCOPE</code> 連帶未驗窄視窗重排）。
+      這三項需要人工操作瀏覽器與輔具，<b>不在靜態前端預覽可自證的範圍內</b>，已列入人工驗收清單。<br>
+      <b>色彩對比已無缺口</b>——兩套主題各 14 組全數 AA 以上、FAIL 0。
+    </div>
+  </div>
+
+  <!-- ============ 7. 完整導航地圖 ============ -->
+  <div class="card">
+    <h2><span class="n">7</span>完整導航地圖（M0–M8）</h2>
+    <p class="sub">整套前端九個檔案；<span class="badge inv">對外</span> 與 <span class="badge block">對內 🔒</span> 已分色標示。點卡片直接跳頁。</p>
+    <div class="mapgrid" id="mapGrid"></div>
+    <div class="okbox">
+      <b>前端里程碑 M0–M8 全數完成</b>（桌機靜態預覽、純前端示意）。<code>MOBILE = OUT_OF_SCOPE</code>（Winnie 指示不做延伸）。
+      <b>下一步不是再畫頁面，是接資料層</b>——見本頁下方「還缺什麼才能進人工驗收」。
+    </div>
+  </div>
+
+  <div class="role-callout">
+    <b>四角色不混稱（總結）</b>：<code>REQUESTER_PARTNER</code>（提案方，如範例案 A）、<code>INVITED_KOL</code>（受邀 KOL）、
+    <code>BRAND</code>／<code>VENDOR</code>（品牌／外包廠商）＝<b>全部</b>用 <code>PromotionPartners.partner_id</code>；
+    只有內部同事（<code>owner_user_id</code>／<code>reviewed_by</code>／<code>verified_by</code>／<code>created_by</code>）用 <code>Users.id</code>。
+    本頁矩陣、用語表、狀態機說明皆依此規則撰寫。
+  </div>
+
+  <footer class="foot">
+    <div style="margin-top:14px">
+      <span class="pill">FULL_FLOW_AND_VISUAL_SUMMARY</span>
+      <span class="pill out">PARTNER_MASTER = PromotionPartners（非 Users.id）</span>
+      <span class="pill out">SOFT_STATE_ONLY = 不 deleteRow</span>
+      <span class="pill guard">PUBLIC_PAGE_NO_INTERNAL_FEATURE = TRUE</span>
+      <span class="pill guard">PRODUCTION_DEPLOYMENT = NOT_AUTHORIZED</span>
+    </div>
+    <p style="margin:10px 0 0">
+      <strong>M8 全流程與視覺整理（桌機預覽）</strong> · FEATURE_SANDBOX 靜態 HTML · 純前端示意，<strong>不連後端、不寫入任何資料、不部署</strong>。<br>
+      三套狀態機泳道圖（含允許的下一步／退回補件／暫停取消不 deleteRow）＋ 跨案件總覽 Dashboard（含「卡在誰」分組）＋ 四種狀態樣式庫
+      ＋ 5 角色 × 15 項資源權限矩陣 ＋ 一致用語表 ＋ 無障礙實測與缺口揭露 ＋ M0–M8 導航地圖。
+      測試資料一律 <code>KOL-TEST-*</code> / <code>PROMO-TEST-*</code> / <code>example-test</code> 網域，未使用任何真實 KOL 或客戶資料。
+    </p>
+  </footer>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===================================================================
+   M8 全流程與視覺整理 · 純前端靜態示意
+   本檔不含任何 fetch / XMLHttpRequest / google.script / WebSocket /
+   外部資源載入 / 儲存 API。所有互動皆為畫面示意，不寫入任何系統。
+   資料全為虛構（KOL-TEST-* / PROMO-TEST-* / example-test 網域）。
+   =================================================================== */
+
+function esc(s){
+  return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function fmt(v){ return (Number(v)||0).toLocaleString('en-US'); }
+function money(v){ return 'TWD ' + (Number(v)||0).toLocaleString('en-US'); }
+
+/* =========================================================
+   1. 三套狀態機（lane：0=最上方泳道）
+   ========================================================= */
+const SM = {
+  REQ:{
+    title:'PromotionRequest 需求單狀態機',
+    lanes:[
+      { n:'外部提案方', k:'REQUESTER_PARTNER' },
+      { n:'內部承辦',   k:'Users.id' },
+      { n:'分支／終態', k:'soft only' }
+    ],
+    cur:'CONVERTED_TO_PROJECT',
+    cols:6,
+    nodes:[
+      { c:'DRAFT', zh:'草稿', lane:0, col:1, actor:'提案方', page:'M2 需求表單',
+        next:['SUBMITTED','CANCELLED'], note:'表單填寫中，可離開再回來續填（草稿保存示意見 M2）。尚未進入內部視野。' },
+      { c:'SUBMITTED', zh:'已送出', lane:0, col:2, actor:'提案方', page:'M2 送出完成頁',
+        next:['UNDER_REVIEW','CANCELLED'], note:'送出後產生需求編號；免費媒合額度此時<b>只提示、不扣</b>。防重複送出見 M2。' },
+      { c:'UNDER_REVIEW', zh:'審核中', lane:1, col:3, actor:'內部承辦', page:'M3 審核台',
+        next:['APPROVED','NEEDS_MORE_INFO','REJECTED','ON_HOLD'],
+        note:'內部逐題檢視 14 題與附件。<b>REJECTED／NEEDS_MORE_INFO 必填 review_note</b>（M3 已實作閘門）。' },
+      { c:'NEEDS_MORE_INFO', zh:'退回補件', lane:0, col:4, actor:'提案方', page:'M3 → 通知提案方',
+        next:['UNDER_REVIEW','CANCELLED'], back:true,
+        note:'球丟回提案方補資料。<b>同一張需求單來回，不另開新單</b>；補完回到 UNDER_REVIEW 再審。' },
+      { c:'APPROVED', zh:'審核通過', lane:1, col:5, actor:'內部承辦', page:'M3 建案',
+        next:['CONVERTED_TO_PROJECT'], note:'通過但尚未建案。<b>此階段仍不扣額度、不得建外包工單</b>（M6 四階段禁建第 2 關）。' },
+      { c:'CONVERTED_TO_PROJECT', zh:'已轉案件', lane:1, col:6, actor:'內部承辦', page:'M3 → M4',
+        next:[], term:true, note:'需求單生命週期結束，接手者為 PromotionProject。<b>需求單不刪除</b>，永久保留為原始憑據。' },
+      { c:'ON_HOLD', zh:'暫緩', lane:2, col:4, actor:'內部承辦', page:'M3',
+        next:['UNDER_REVIEW','CANCELLED'], note:'暫時不處理（例如檔期未定）。<b>只改狀態欄，不 deleteRow</b>，隨時可拉回審核。' },
+      { c:'REJECTED', zh:'不承接', lane:2, col:5, actor:'內部承辦', page:'M3',
+        next:[], term:true, bad:true, note:'不承接。<b>必填 review_note 說明理由</b>（M3 閘門）。列保留，日後可查為何不接。' },
+      { c:'CANCELLED', zh:'已取消', lane:2, col:6, actor:'提案方／內部', page:'M3',
+        next:[], term:true, bad:true, note:'提案方撤回或內部作廢。<b>soft cancel，不 deleteRow</b>。' }
+    ]
+  },
+  PRJ:{
+    title:'PromotionProject 案件狀態機',
+    lanes:[
+      { n:'內部承辦', k:'Users.id' },
+      { n:'KOL 互動', k:'PromotionPartners' },
+      { n:'執行與財務', k:'內部＋外包' },
+      { n:'分支／終態', k:'soft only' }
+    ],
+    cur:'WAITING_FOR_PUBLICATION',
+    cols:13,
+    nodes:[
+      { c:'DRAFT', zh:'案件草稿', lane:0, col:1, actor:'內部承辦', page:'M3',
+        next:['MATCHING_PREPARATION','CANCELLED'], note:'由審核通過的需求單轉出，欄位帶入 snapshot。' },
+      { c:'MATCHING_PREPARATION', zh:'媒合準備', lane:0, col:2, actor:'內部承辦', page:'M3 → M4',
+        next:['KOL_SELECTION','ON_HOLD','CANCELLED'], note:'確認合作形式、預算範圍、時程。仍不扣額度。' },
+      { c:'KOL_SELECTION', zh:'篩選 KOL', lane:0, col:3, actor:'內部承辦', page:'M4 KOL 媒合',
+        next:['KOL_INVITATION','ON_HOLD','CANCELLED'], note:'加入候選＝ <code>PromotionKOLMatches.CANDIDATE</code>。<b>此階段不扣額度、不得建工單</b>。' },
+      { c:'KOL_INVITATION', zh:'寄送邀約', lane:1, col:4, actor:'內部 → KOL', page:'M5 邀約與報價',
+        next:['WAITING_FOR_QUOTES','ON_HOLD','CANCELLED'], credit:'額度 AVAILABLE → RESERVED',
+        note:'<b>首次寄出邀約時，免費媒合額度由 AVAILABLE 轉 RESERVED</b>（歸戶 requester_partner_id、寫 OperationLogs、冪等）。' },
+      { c:'WAITING_FOR_QUOTES', zh:'等待報價', lane:1, col:5, actor:'KOL', page:'M5 回覆回填',
+        next:['QUOTE_REVIEW','ON_HOLD','CANCELLED'], note:'球在 KOL 手上。內部只回填其意願與報價，不催不逼。' },
+      { c:'QUOTE_REVIEW', zh:'報價彙整', lane:1, col:6, actor:'內部承辦', page:'M5 比較表',
+        next:['COLLABORATION_CONFIRMATION','KOL_SELECTION','ON_HOLD','CANCELLED'],
+        note:'彙整比較。<b>定價方向由 KOL 報價彙整而來</b>，不得先向提案方報固定總價。候選不足可退回 KOL_SELECTION 補人。' },
+      { c:'COLLABORATION_CONFIRMATION', zh:'確認合作', lane:1, col:7, actor:'內部＋KOL', page:'M5 啟動媒合',
+        next:['CONTENT_PREPARATION','ON_HOLD','CANCELLED'], credit:'額度 RESERVED → USED',
+        note:'至少一位 KOL <code>CONFIRMED</code> 且正式啟動媒合後，<b>額度轉 USED（終態、不回補）</b>。' },
+      { c:'CONTENT_PREPARATION', zh:'內容準備', lane:2, col:8, actor:'內部＋外包', page:'M6 任務與工單',
+        next:['IN_EXECUTION','ON_HOLD'], note:'依合作形式產生任務範本。<b>要外包才 preview→confirm 建工單</b>（M6 守門）。' },
+      { c:'IN_EXECUTION', zh:'執行中', lane:2, col:9, actor:'內部＋KOL＋外包', page:'M6',
+        next:['WAITING_FOR_PUBLICATION','ON_HOLD'], note:'訪綱、錄製、剪輯、審稿往返。' },
+      { c:'WAITING_FOR_PUBLICATION', zh:'待上架', lane:2, col:10, actor:'KOL', page:'M7 交付追蹤',
+        next:['PERFORMANCE_TRACKING','ON_HOLD'], note:'逐 KOL 逐交付物追上架；<b>延遲必填原因</b>；不上架走 soft disposition，不刪列。' },
+      { c:'PERFORMANCE_TRACKING', zh:'成效追蹤', lane:2, col:11, actor:'內部承辦', page:'M7 成效回填',
+        next:['FINANCE_PROCESSING'], note:'逐筆回填 PromotionResults；<b>核實者必須是內部 Users.id</b>，且需 evidence_url。' },
+      { c:'FINANCE_PROCESSING', zh:'財務處理', lane:2, col:12, actor:'內部承辦／財務', page:'M7 財務',
+        next:['COMPLETED'], note:'請款、發票、付款。<b>標 PAID 必須連 external_payment_record_id</b>，不建第二本帳。' },
+      { c:'COMPLETED', zh:'已結案', lane:2, col:13, actor:'內部承辦', page:'M7 結案',
+        next:[], term:true, note:'結案檢查清單全綠才可進入。<b>只改狀態，資料列全保留</b>。' },
+      { c:'ON_HOLD', zh:'暫停', lane:3, col:7, actor:'內部承辦', page:'各頁',
+        next:['（回到暫停前的狀態）','CANCELLED'], note:'<b>soft 暫停</b>：保留原狀態於 <code>previous_status</code>，恢復時原路回去；不 deleteRow。' },
+      { c:'CANCELLED', zh:'已取消', lane:3, col:13, actor:'內部承辦', page:'各頁',
+        next:[], term:true, bad:true, note:'案件中止。<b>已 USED 的額度不回補</b>（見 FREE_MATCH_CREDIT_CONTRACT）；未 USED 前取消則 RELEASED 回補。' }
+    ]
+  },
+  MAT:{
+    title:'PromotionMatch 單一 KOL 配對狀態機',
+    lanes:[
+      { n:'內部承辦', k:'Users.id' },
+      { n:'受邀 KOL', k:'PromotionPartners' },
+      { n:'負向終態', k:'soft only' }
+    ],
+    cur:'CONFIRMED',
+    cols:10,
+    nodes:[
+      { c:'CANDIDATE', zh:'候選', lane:0, col:1, actor:'內部承辦', page:'M4',
+        next:['READY_TO_INVITE','CANCELLED'], note:'加入候選清單。<b>不扣額度、不寄信、不建工單</b>。重複加入同一 KOL 會被擋（M4 防呆）。' },
+      { c:'READY_TO_INVITE', zh:'待邀約', lane:0, col:2, actor:'內部承辦', page:'M4 → M5',
+        next:['INVITATION_DRAFTED','CANCELLED'], note:'已確認可邀。<b>Email 缺失或 INACTIVE 會被寄送前檢查擋下</b>（M5 三項擋關）。' },
+      { c:'INVITATION_DRAFTED', zh:'草稿已產生', lane:0, col:3, actor:'內部承辦', page:'M5',
+        next:['INVITATION_SENT','CANCELLED'], note:'批次產生草稿，但<b>逐筆確認才寄出</b>；不自動大量寄送。' },
+      { c:'INVITATION_SENT', zh:'已寄出', lane:0, col:4, actor:'內部承辦', page:'M5',
+        next:['WAITING_RESPONSE'], credit:'首次寄出 → 額度 RESERVED',
+        note:'寫入 <code>PromotionInvitationLogs</code>（<b>只存 body_hash、不存 token/credential</b>）。' },
+      { c:'WAITING_RESPONSE', zh:'等待回覆', lane:1, col:5, actor:'KOL', page:'M5',
+        next:['INTERESTED','DECLINED','NO_RESPONSE'], note:'球在 KOL 手上。' },
+      { c:'INTERESTED', zh:'有意願', lane:1, col:6, actor:'KOL', page:'M5 回填',
+        next:['NEGOTIATING','DECLINED'], note:'回填 <code>interest_level</code> / <code>response_status</code>。' },
+      { c:'NEGOTIATING', zh:'洽談中', lane:1, col:7, actor:'內部＋KOL', page:'M5',
+        next:['QUOTE_RECEIVED','DECLINED'], note:'談檔期、形式、條件。' },
+      { c:'QUOTE_RECEIVED', zh:'已收到報價', lane:1, col:8, actor:'KOL', page:'M5 比較表',
+        next:['CONFIRMED','DECLINED'], note:'回填 <code>quoted_fee</code> / <code>quoted_currency</code>，進比較表。' },
+      { c:'CONFIRMED', zh:'確認合作', lane:0, col:9, actor:'內部承辦', page:'M5 → M6 → M7',
+        next:['COMPLETED','CANCELLED'], credit:'啟動媒合 → 額度 USED',
+        note:'範例案 A案有 <b>3 位 KOL 到此</b>（KOL-1／KOL-2／KOL-3）。之後才長任務、才可能建外包工單、才有交付物與財務列。' },
+      { c:'COMPLETED', zh:'配對完成', lane:0, col:10, actor:'內部承辦', page:'M7 結案',
+        next:[], term:true, note:'該 KOL 的交付物皆已上架或處置、成效已回填、款項狀態明確。' },
+      { c:'DECLINED', zh:'婉拒', lane:2, col:6, actor:'KOL', page:'M5',
+        next:[], term:true, bad:true, note:'KOL 婉拒。<b>不刪列</b>——保留為日後媒合的歷史依據（M4 可看過往合作紀錄）。' },
+      { c:'NO_RESPONSE', zh:'未回覆', lane:2, col:7, actor:'—', page:'M5',
+        next:[], term:true, bad:true, note:'逾期未回。同樣<b>不刪列</b>，可作為下次是否再邀的判斷。' },
+      { c:'CANCELLED', zh:'已取消', lane:2, col:10, actor:'內部承辦', page:'M5／M7',
+        next:[], term:true, bad:true, note:'內部撤銷此配對。<b>soft cancel，不 deleteRow</b>。' }
+    ]
+  }
+};
+let SM_CUR = 'REQ';
+let SM_SEL = null;
+
+function showSM(k){
+  SM_CUR = k; SM_SEL = null;
+  ['REQ','PRJ','MAT'].forEach(x=>{
+    document.getElementById('tab'+x).className = 'minibtn' + (x===k?' on':'');
+  });
+  renderSwim();
+  document.getElementById('smDetail').innerHTML =
+    '<div class="detail" style="border-style:solid;border-color:var(--line-strong);background:var(--surface-2);color:var(--ink-soft)">'+
+    '<h4 style="color:var(--ink)">' + esc(SM[k].title) + '</h4>'+
+    '<div class="code">點上方任一狀態節點，這裡會顯示：這個狀態是誰在動、對應哪一頁、允許往哪走、會不會影響免費媒合額度。</div>'+
+    '</div>';
+}
+function renderSwim(){
+  const m = SM[SM_CUR];
+  document.getElementById('swim').innerHTML = m.lanes.map((ln,li)=>{
+    const cells = [];
+    for(let c=1;c<=m.cols;c++){
+      const nd = m.nodes.find(n=>n.lane===li && n.col===c);
+      if(nd){
+        const cls = ['snode'];
+        if(nd.c===m.cur) cls.push('cur');
+        if(nd.term) cls.push('term');
+        if(nd.bad) cls.push('bad');
+        if(SM_SEL===nd.c) cls.push('sel');
+        cells.push(`<button class="${cls.join(' ')}" onclick="selNode('${esc(nd.c)}')" style="grid-column:${c+1}">
+          ${esc(nd.c)}<span class="zh">${esc(nd.zh)}${nd.c===m.cur?' ← 範例案 A案在這':''}</span>
+          ${nd.credit?`<span class="cr">◆ ${esc(nd.credit)}</span>`:''}</button>`);
+      }
+    }
+    return `<div class="lane" style="grid-template-columns:132px repeat(${m.cols},minmax(150px,1fr))">
+      <div class="lanelabel" style="grid-column:1">${esc(ln.n)}<small>${esc(ln.k)}</small></div>
+      ${cells.join('')}
+    </div>`;
+  }).join('');
+}
+function selNode(code){
+  SM_SEL = code;
+  const m = SM[SM_CUR];
+  const nd = m.nodes.find(n=>n.c===code);
+  renderSwim();
+  document.getElementById('smDetail').innerHTML = `
+    <div class="detail">
+      <h4>${esc(nd.c)} · ${esc(nd.zh)}${nd.c===m.cur?' <span class="badge act">範例案 A案目前位置</span>':''}</h4>
+      <div class="code">${esc(m.title)} · 操作者：${esc(nd.actor)} · 對應頁面：${esc(nd.page)}${nd.term?' · 終態':''}</div>
+      <div style="line-height:1.7">${nd.note}</div>
+      ${nd.credit?`<div style="margin-top:8px"><span class="badge pass">◆ 免費媒合額度：${esc(nd.credit)}</span></div>`:''}
+      <div style="margin-top:10px;font-size:12px;font-weight:800;color:var(--info)">允許的下一步：</div>
+      <div class="nexts">
+        ${nd.next.length ? nd.next.map(x=>{
+          const t = m.nodes.find(y=>y.c===x);
+          const cls = t && t.bad ? 'nx bad' : ((t && t.back) || x.indexOf('回到')>=0 ? 'nx back' : 'nx');
+          return t ? `<button class="${cls}" onclick="selNode('${esc(x)}')">${esc(x)} · ${esc(t.zh)}</button>`
+                   : `<span class="nx back">${esc(x)}</span>`;
+        }).join('') : '<span class="nx" style="cursor:default">（終態 · 無後續狀態）</span>'}
+      </div>
+      <div style="margin-top:8px;font-size:11.5px;color:var(--ink-soft)">
+        ${nd.term ? '此為終態。' : '狀態只能沿上列路徑轉移；任何未列出的跳轉一律視為非法轉移並擋下。'}
+        <b>所有負向結果（不承接／婉拒／取消／暫停）皆為 soft state，不 deleteRow。</b>
+      </div>
+    </div>`;
+}
+
+/* =========================================================
+   2. 跨案件總覽
+   ========================================================= */
+const PROJECTS = [
+  { id:'PROMO-TEST-PRJ-001', name:'範例案 A兒童即興戲劇工作坊（KOL 專屬場次）', owner:'U-101 企劃 A',
+    status:'WAITING_FOR_PUBLICATION', kols:3, delivWait:3, delivLate:4, ar:0, ap:79440, sub:'COURSE_RECIPROCAL' },
+  { id:'PROMO-TEST-PRJ-002', name:'手沖咖啡器具組推廣', owner:'U-204 林行銷',
+    status:'KOL_INVITATION', kols:0, delivWait:0, delivLate:0, ar:0, ap:0, sub:'PRODUCT_PROMOTION' },
+  { id:'PROMO-TEST-PRJ-003', name:'線上簡報課早鳥招生', owner:'U-101 企劃 A',
+    status:'WAITING_FOR_QUOTES', kols:0, delivWait:0, delivLate:0, ar:0, ap:0, sub:'COURSE_RECIPROCAL' },
+  { id:'PROMO-TEST-PRJ-004', name:'親子桌遊體驗會', owner:'U-204 林行銷',
+    status:'PERFORMANCE_TRACKING', kols:2, delivWait:1, delivLate:1, ar:0, ap:36000, sub:'EVENT_PROMOTION' },
+  { id:'PROMO-TEST-PRJ-005', name:'香氛品牌聯名企劃', owner:'U-101 企劃 A',
+    status:'ON_HOLD', kols:0, delivWait:0, delivLate:0, ar:0, ap:0, sub:'BRAND_PROMOTION' },
+  { id:'PROMO-TEST-PRJ-006', name:'有聲書平台年訂閱推廣', owner:'U-204 林行銷',
+    status:'FINANCE_PROCESSING', kols:4, delivWait:0, delivLate:0, ar:120000, ap:58000, sub:'SERVICE_PROMOTION' },
+  { id:'PROMO-TEST-PRJ-007', name:'手作皮件工作坊（已結）', owner:'U-101 企劃 A',
+    status:'COMPLETED', kols:2, delivWait:0, delivLate:0, ar:0, ap:0, sub:'COURSE_RECIPROCAL' }
+];
+const REQUESTS = [
+  { id:'PROMO-TEST-004', name:'手沖濾杯新品開箱推廣', who:'品牌方（測試）', status:'SUBMITTED' },
+  { id:'PROMO-TEST-005', name:'兒童英語繪本課', who:'講師（測試）', status:'UNDER_REVIEW' },
+  { id:'PROMO-TEST-006', name:'露營裝備品牌合作', who:'品牌方（測試）', status:'NEEDS_MORE_INFO' }
+];
+
+/* 「卡在誰」＝由狀態推導，不另存欄位 */
+function blockedBy(status){
+  const map = {
+    KOL_SELECTION:'內部承辦', MATCHING_PREPARATION:'內部承辦', DRAFT:'內部承辦',
+    KOL_INVITATION:'內部承辦', QUOTE_REVIEW:'內部承辦',
+    WAITING_FOR_QUOTES:'受邀 KOL', COLLABORATION_CONFIRMATION:'受邀 KOL', WAITING_FOR_PUBLICATION:'受邀 KOL',
+    CONTENT_PREPARATION:'外包／製作', IN_EXECUTION:'外包／製作',
+    PERFORMANCE_TRACKING:'內部承辦', FINANCE_PROCESSING:'財務／請款',
+    ON_HOLD:'待內部決定', COMPLETED:'（已結案）', CANCELLED:'（已取消）'
+  };
+  return map[status] || '內部承辦';
+}
+function stBadge(s){
+  if(s==='COMPLETED') return `<span class="badge pass">${esc(s)}</span>`;
+  if(s==='CANCELLED') return `<span class="badge block">${esc(s)}</span>`;
+  if(s==='ON_HOLD') return `<span class="badge act">${esc(s)}</span>`;
+  return `<span class="badge inv">${esc(s)}</span>`;
+}
+let GROUP = 'FLAT';
+function setGroup(g){
+  GROUP = g;
+  document.getElementById('grpBtnFlat').className = 'minibtn' + (g==='FLAT'?' on':'');
+  document.getElementById('grpBtnWho').className  = 'minibtn' + (g==='WHO'?' on':'');
+  renderProjects();
+}
+function prjRow(p){
+  return `<tr>
+    <td class="mono">${esc(p.id)}</td>
+    <td>${esc(p.name)}<br><span style="font-size:11px;color:var(--ink-faint)">${esc(p.sub)}</span></td>
+    <td class="mono">${esc(p.owner)}</td>
+    <td>${stBadge(p.status)}</td>
+    <td class="num">${p.kols}</td>
+    <td class="num">${p.delivWait||'—'}</td>
+    <td class="num">${p.delivLate?`<span style="color:var(--guard);font-weight:800">${p.delivLate}</span>`:'—'}</td>
+    <td class="num">${p.ar?money(p.ar):'—'}</td>
+    <td class="num">${p.ap?money(p.ap):'—'}</td>
+    <td>${esc(blockedBy(p.status))}</td>
+  </tr>`;
+}
+const PRJ_HEAD = `<thead><tr>
+  <th class="mono">promotion_project_id</th><th>案件名稱</th><th class="mono">owner_user_id</th><th class="mono">project_status</th>
+  <th class="num">確認 KOL</th><th class="num">待上架</th><th class="num">延遲</th><th class="num">未收款</th><th class="num">未付款</th><th>卡在誰</th>
+</tr></thead>`;
+function renderProjects(){
+  const area = document.getElementById('prjArea');
+  if(GROUP==='FLAT'){
+    area.innerHTML = `<div class="tblwrap"><table class="tbl">${PRJ_HEAD}<tbody>
+      ${PROJECTS.map(prjRow).join('')}
+      <tr class="sumrow"><td colspan="4">合計（${PROJECTS.length} 件案件）</td>
+        <td class="num">${PROJECTS.reduce((s,p)=>s+p.kols,0)}</td>
+        <td class="num">${PROJECTS.reduce((s,p)=>s+p.delivWait,0)}</td>
+        <td class="num">${PROJECTS.reduce((s,p)=>s+p.delivLate,0)}</td>
+        <td class="num">${money(PROJECTS.reduce((s,p)=>s+p.ar,0))}</td>
+        <td class="num">${money(PROJECTS.reduce((s,p)=>s+p.ap,0))}</td><td></td></tr>
+      </tbody></table></div>`;
+  } else {
+    const groups = {};
+    PROJECTS.forEach(p=>{ const g = blockedBy(p.status); (groups[g] = groups[g] || []).push(p); });
+    area.innerHTML = Object.keys(groups).map(g=>`
+      <div class="groupbox">
+        <h4>卡在：${esc(g)}<span class="cnt">${groups[g].length} 件</span></h4>
+        <div class="tblwrap"><table class="tbl">${PRJ_HEAD}<tbody>${groups[g].map(prjRow).join('')}</tbody></table></div>
+      </div>`).join('');
+  }
+
+  /* 需求單清單 */
+  area.innerHTML += `
+    <div class="groupbox" style="margin-top:12px">
+      <h4>待處理需求單（PromotionRequests）<span class="cnt">${REQUESTS.length} 張</span></h4>
+      <div class="tblwrap"><table class="tbl">
+        <thead><tr><th class="mono">promotion_request_id</th><th>標的</th><th>提案方</th><th class="mono">request_status</th><th>卡在誰</th></tr></thead>
+        <tbody>${REQUESTS.map(r=>`<tr>
+          <td class="mono">${esc(r.id)}</td><td>${esc(r.name)}</td><td>${esc(r.who)}</td>
+          <td>${stBadge(r.status)}</td>
+          <td>${r.status==='NEEDS_MORE_INFO'?'外部提案方（補件中）':'內部承辦（待審）'}</td>
+        </tr>`).join('')}</tbody>
+      </table></div>
+    </div>`;
+}
+function renderKpi(){
+  const active = PROJECTS.filter(p=>p.status!=='COMPLETED' && p.status!=='CANCELLED').length;
+  const review = REQUESTS.filter(r=>r.status==='SUBMITTED' || r.status==='UNDER_REVIEW').length;
+  const more   = REQUESTS.filter(r=>r.status==='NEEDS_MORE_INFO').length;
+  const invite = PROJECTS.filter(p=>p.status==='KOL_SELECTION' || p.status==='KOL_INVITATION').length;
+  const quote  = PROJECTS.filter(p=>p.status==='WAITING_FOR_QUOTES').length;
+  const pub    = PROJECTS.reduce((s,p)=>s+p.delivWait,0);
+  const late   = PROJECTS.reduce((s,p)=>s+p.delivLate,0);
+  const ar     = PROJECTS.reduce((s,p)=>s+p.ar,0);
+  const ap     = PROJECTS.reduce((s,p)=>s+p.ap,0);
+  document.getElementById('kActive').textContent = active;
+  document.getElementById('kReview').textContent = review;
+  document.getElementById('kMore').textContent   = more;
+  document.getElementById('kInvite').textContent = invite;
+  document.getElementById('kQuote').textContent  = quote;
+  document.getElementById('kPub').textContent    = pub;
+  document.getElementById('kLate').textContent   = late;
+  document.getElementById('kMoney').innerHTML    = fmt(ar+ap) + '<small> 元</small>';
+}
+
+/* =========================================================
+   3. 狀態樣式庫
+   ========================================================= */
+const STATES = {
+  EMPTY: `<div class="empty-st">
+      <div class="icon">🗂</div>
+      <h4>還沒有任何 KOL 候選</h4>
+      <p>這個案件目前是 <span class="mono">KOL_SELECTION</span>，但候選清單還是空的。
+      先到左側名單用類別、粉絲數、過往合作篩人，再批次加入候選。<b>加入候選不會扣免費媒合額度。</b></p>
+      <button class="minibtn solid" onclick="toast('示意：前往 M4 KOL 名單')">前往篩選 KOL</button>
+    </div>`,
+  LOADING: `<div class="skel" aria-label="載入中">
+      <div class="skrow" style="width:38%;height:17px"></div>
+      <div class="skrow" style="width:96%"></div>
+      <div class="skrow" style="width:88%"></div>
+      <div class="skrow" style="width:72%"></div>
+      <div class="skrow" style="width:91%"></div>
+      <div class="skrow" style="width:44%"></div>
+      <div style="font-size:11.5px;color:var(--ink-faint);margin-top:4px">
+        骨架屏維持版面高度，資料回來時不跳動。（本頁為靜態示意，<b>不發任何請求</b>）</div>
+    </div>`,
+  ERROR: `<div class="errbox" role="alert">
+      <h4>⚠ 送出失敗：有 3 個欄位需要修正</h4>
+      <div style="font-size:12.5px">已擋下寫入——<b>沒有任何資料被寫進系統</b>，你填的內容都還在，修正後可直接再送。</div>
+      <ul>
+        <li><b>Q1 您的姓名</b>：必填未填</li>
+        <li><b>Q8 預計課程時間與地點</b>：必填未填</li>
+        <li><b>聯絡 Email</b>：格式不正確（缺 @）</li>
+      </ul>
+      <div class="fldline">聯絡 Email：<span class="mono">winnie.example-test</span>
+        <div style="font-size:11.5px;color:var(--guard);font-weight:700;margin-top:3px">Email 格式不正確，請填寫可收信的完整信箱</div></div>
+      <div style="font-size:11.5px;margin-top:10px;color:var(--guard)">
+        錯誤三要素：<b>哪個欄位</b>／<b>為什麼被擋</b>／<b>怎麼修</b>——缺一不可。</div>
+    </div>`,
+  SUCCESS: `<div class="okstate">
+      <div class="icon">✓</div>
+      <h4>需求已送出，我們收到了</h4>
+      <p>內部會在 3 個工作天內審閱並與你聯繫。這段期間<b>不需要重複送出</b>。</p>
+      <div class="rid">需求編號：PROMO-TEST-004</div>
+      <p style="margin-top:9px;font-size:11.5px;color:var(--ink-faint)">
+        成功狀態一定給可追溯 ID；同時關閉送出按鈕，避免重複送出（M2 已實作）。</p>
+    </div>`
+};
+function showState(k){
+  ['EMPTY','LOADING','ERROR','SUCCESS'].forEach(x=>{
+    document.getElementById('stBtn'+x).className = 'minibtn' + (x===k?' on':'');
+  });
+  document.getElementById('stateDemo').innerHTML = STATES[k];
+}
+
+/* =========================================================
+   4. 權限矩陣
+   ========================================================= */
+/* 值：EDIT 可操作 / VIEW 唯讀 / OWN 只看自己那份 / NONE 不可見 */
+const PERMS = [
+  { r:'M1 雙入口首頁', k:'公開頁 · ENTRY_TYPE 路由', ext:true,
+    v:{ REQUESTER:'EDIT', KOL:'VIEW', MANAGER:'EDIT', STAFF:'EDIT', VENDOR:'VIEW' } },
+  { r:'M2 推廣需求表單（填寫／送出）', k:'PromotionRequests 寫入', ext:true,
+    v:{ REQUESTER:'EDIT', KOL:'NONE', MANAGER:'EDIT', STAFF:'EDIT', VENDOR:'NONE' } },
+  { r:'自己送出的需求進度', k:'PromotionRequests（限本人）', ext:true,
+    v:{ REQUESTER:'OWN', KOL:'NONE', MANAGER:'EDIT', STAFF:'EDIT', VENDOR:'NONE' } },
+  { r:'M3 內部審核台與建案', k:'審核動作 · review_note', ext:false,
+    v:{ REQUESTER:'NONE', KOL:'NONE', MANAGER:'EDIT', STAFF:'EDIT', VENDOR:'NONE' } },
+  { r:'M4 KOL 名單與候選清單', k:'PromotionPartners · Matches', ext:false,
+    v:{ REQUESTER:'NONE', KOL:'NONE', MANAGER:'EDIT', STAFF:'EDIT', VENDOR:'NONE' } },
+  { r:'M5 邀約信內容（收件那一封）', k:'InvitationLogs（限本人）', ext:true,
+    v:{ REQUESTER:'NONE', KOL:'OWN', MANAGER:'EDIT', STAFF:'EDIT', VENDOR:'NONE' } },
+  { r:'M5 報價彙整比較表（全部 KOL）', k:'跨 KOL 比價', ext:false,
+    v:{ REQUESTER:'NONE', KOL:'NONE', MANAGER:'EDIT', STAFF:'VIEW', VENDOR:'NONE' } },
+  { r:'M6 任務列表', k:'PromotionTasks', ext:false,
+    v:{ REQUESTER:'NONE', KOL:'OWN', MANAGER:'EDIT', STAFF:'EDIT', VENDOR:'OWN' } },
+  { r:'M6 外包工單建立（preview→confirm）', k:'WorkOrders 建單', ext:false,
+    v:{ REQUESTER:'NONE', KOL:'NONE', MANAGER:'EDIT', STAFF:'EDIT', VENDOR:'NONE' } },
+  { r:'M7 交付物與上架登記', k:'PromotionDeliverables', ext:false,
+    v:{ REQUESTER:'NONE', KOL:'OWN', MANAGER:'EDIT', STAFF:'EDIT', VENDOR:'NONE' } },
+  { r:'M7 成效核實（verified_by）', k:'PromotionResults 核實', ext:false,
+    v:{ REQUESTER:'NONE', KOL:'NONE', MANAGER:'EDIT', STAFF:'EDIT', VENDOR:'NONE' } },
+  { r:'M7 財務明細與付款標記', k:'PromotionFinance', ext:false,
+    v:{ REQUESTER:'NONE', KOL:'OWN', MANAGER:'EDIT', STAFF:'VIEW', VENDOR:'OWN' } },
+  { r:'M8 跨案件總覽 Dashboard', k:'跨案彙總', ext:false,
+    v:{ REQUESTER:'NONE', KOL:'NONE', MANAGER:'EDIT', STAFF:'VIEW', VENDOR:'NONE' } },
+  { r:'免費媒合額度餘額', k:'PartnerBenefits（限本人）', ext:true,
+    v:{ REQUESTER:'OWN', KOL:'NONE', MANAGER:'EDIT', STAFF:'VIEW', VENDOR:'NONE' } },
+  { r:'OperationLogs 稽核紀錄', k:'append-only 稽核', ext:false,
+    v:{ REQUESTER:'NONE', KOL:'NONE', MANAGER:'VIEW', STAFF:'NONE', VENDOR:'NONE' } }
+];
+const PSYM = { EDIT:'✎', VIEW:'👁', OWN:'◐', NONE:'—' };
+const PCOL = { EDIT:'var(--accent-ink)', VIEW:'var(--info)', OWN:'var(--action)', NONE:'var(--ink-faint)' };
+let ROLE = 'ALL';
+function setRole(r){
+  ROLE = r;
+  ['ALL','REQUESTER','KOL','MANAGER','STAFF','VENDOR'].forEach(x=>{
+    document.getElementById('roleBtn'+x).className = 'minibtn' + (x===r?' on':'');
+  });
+  renderPerm();
+}
+function renderPerm(){
+  const cols = ['REQUESTER','KOL','MANAGER','STAFF','VENDOR'];
+  document.getElementById('permBody').innerHTML = PERMS.map(p=>{
+    const visible = ROLE!=='ALL' && p.v[ROLE] !== 'NONE';
+    return `<tr class="${p.ext?'ext':'int'} ${visible?'hl':''}">
+      <td class="res">${esc(p.r)}${p.ext?' <span class="badge inv">對外</span>':' <span class="badge block">對內 🔒</span>'}<small>${esc(p.k)}</small></td>
+      ${cols.map(c=>`<td class="c" style="color:${PCOL[p.v[c]]};font-weight:800" title="${esc(p.v[c])}">${PSYM[p.v[c]]}</td>`).join('')}
+    </tr>`;
+  }).join('');
+  if(ROLE!=='ALL'){
+    const vis = PERMS.filter(p=>p.v[ROLE]!=='NONE');
+    const intVis = vis.filter(p=>!p.ext);
+    toast(`${roleName(ROLE)} 視角：15 項資源中看得到 ${vis.length} 項` +
+      (ROLE==='REQUESTER'||ROLE==='KOL' ? `（其中對內資源 ${intVis.length} 項，且全為「只看自己那份」）` : ''));
+  }
+}
+function roleName(r){
+  return { REQUESTER:'外部提案方', KOL:'受邀 KOL', MANAGER:'內部主管', STAFF:'內部一般人員', VENDOR:'外包廠商', ALL:'全部角色' }[r];
+}
+
+/* =========================================================
+   5. 一致用語表
+   ========================================================= */
+const TERMS = [
+  { a:'需求方（提案方）', e:'REQUESTER_PARTNER', f:'PromotionPartners.partner_id<br>partner_type = INSTRUCTOR / BRAND / COMPANY',
+    pub:'「你」「貴單位」——對外表單直接用第二人稱，不要自稱系統術語', no:'客戶／甲方／用戶／Users.id' },
+  { a:'受邀 KOL', e:'INVITED_KOL', f:'PromotionPartners.partner_id<br>partner_type = KOL',
+    pub:'「合作創作者」「受邀 KOL」', no:'網紅／小編／帳號／Users.id' },
+  { a:'內部承辦', e:'內部人員', f:'Users.id（owner_user_id／reviewed_by／verified_by）',
+    pub:'「我們」「內部團隊」——對外不露個人姓名與帳號', no:'管理員／後台人員／admin' },
+  { a:'外包廠商', e:'VENDOR', f:'PromotionPartners.partner_id<br>partner_type = VENDOR',
+    pub:'（不對外露出）', no:'外包仔／小幫手／供應商編號' },
+  { a:'課程或標的', e:'promotion_subject', f:'PromotionRequests.promotion_subject',
+    pub:'「你要推廣的課程／產品／服務」', no:'商品／案子／東西' },
+  { a:'推廣需求單', e:'PromotionRequest', f:'PromotionRequests（表單寫入）',
+    pub:'「合作需求」「你送出的需求」', no:'訂單／申請書／表單資料' },
+  { a:'推廣案件', e:'PromotionProject', f:'PromotionProjects（審核通過後建立）',
+    pub:'「這次合作」', no:'專案／工單／case' },
+  { a:'配對（案件 × KOL）', e:'PromotionMatch', f:'PromotionKOLMatches（多對多核心）',
+    pub:'「這次的合作邀請」', no:'名單／配對表／媒合單' },
+  { a:'交付物', e:'PromotionDeliverable', f:'PromotionDeliverables（逐 KOL 逐件）',
+    pub:'「你要產出的內容」', no:'作品／稿件／素材（易與外包素材混淆）' },
+  { a:'成效', e:'PromotionResult', f:'PromotionResults（可按日累積）',
+    pub:'「這次的成效數據」', no:'數據／報表／KPI' },
+  { a:'免費媒合額度', e:'FREE_PROMOTION_MATCH', f:'PartnerBenefits（歸戶 requester_partner_id）',
+    pub:'「首次合作免費媒合一次」', no:'點數／扣打／優惠券' },
+  { a:'外包工單', e:'WorkOrder', f:'既有 WorkOrders（推廣端只存 external_work_order_id）',
+    pub:'（不對外露出）', no:'派工單／製作單（避免與推廣任務混稱）' },
+  { a:'推廣任務', e:'PromotionTask', f:'PromotionTasks（內部工作項）',
+    pub:'（不對外露出）', no:'工單（工單專指既有外包 WorkOrders）' },
+  { a:'付款紀錄', e:'PaymentRecord', f:'既有 PaymentRecords（推廣端只存 external_payment_record_id）',
+    pub:'（不對外露出）', no:'帳／款項明細（PromotionFinance 只是明細，不是帳）' }
+];
+function renderTerms(){
+  document.getElementById('termBody').innerHTML = TERMS.map(t=>`
+    <tr>
+      <td class="a">${esc(t.a)}</td>
+      <td class="mono">${esc(t.e)}</td>
+      <td class="mono" style="font-size:10.5px;line-height:1.6">${t.f}</td>
+      <td style="font-size:12px">${esc(t.pub)}</td>
+      <td class="no">${esc(t.no)}</td>
+    </tr>`).join('');
+}
+
+/* =========================================================
+   6. 無障礙
+   ========================================================= */
+/* 對比值＝以 WCAG 2.1 相對亮度公式離線計算後填入
+   （2026-07-25 兩套主題套用修正配色後全面重測；每一組皆為「實際承載文字」的前景/背景組合） */
+const CONTRAST = [
+  /* ---- 淺色主題（14 組）---- */
+  { t:'淺色', u:'內文 on 頁面底色', fg:'#2B2A26', bg:'#F6F4EF', v:13.07, lv:'AAA', fix:'—' },
+  { t:'淺色', u:'內文 on 卡片', fg:'#2B2A26', bg:'#FFFFFF', v:14.36, lv:'AAA', fix:'—' },
+  { t:'淺色', u:'內文 on surface-2', fg:'#2B2A26', bg:'#FCFBF8', v:13.88, lv:'AAA', fix:'—' },
+  { t:'淺色', u:'次要文字 on 卡片', fg:'#6C695F', bg:'#FFFFFF', v:5.49, lv:'AA', fix:'—' },
+  { t:'淺色', u:'次要文字 on 頁面底色', fg:'#6C695F', bg:'#F6F4EF', v:5.00, lv:'AA', fix:'—' },
+  { t:'淺色', u:'弱化文字 on 卡片 ★已修正', fg:'#737060', bg:'#FFFFFF', v:4.98, lv:'AA', fix:'原 #9C988C = 2.88 FAIL' },
+  { t:'淺色', u:'弱化文字 on surface-2 ★已修正', fg:'#737060', bg:'#FCFBF8', v:4.81, lv:'AA', fix:'原 #9C988C = 2.79 FAIL' },
+  { t:'淺色', u:'弱化文字 on 頁面底色 ★已修正', fg:'#737060', bg:'#F6F4EF', v:4.53, lv:'AA', fix:'核准值 #767263 於此僅 4.38，故微調' },
+  { t:'淺色', u:'強調 accent-ink on accent-soft', fg:'#43512C', bg:'#ECEFE1', v:7.34, lv:'AAA', fix:'—' },
+  { t:'淺色', u:'行動色 on action-soft ★已修正', fg:'#96591A', bg:'#FBF2E1', v:5.05, lv:'AA', fix:'原 #A96A22 = 3.96 僅大字 AA' },
+  { t:'淺色', u:'行動色 on 頁面底色 ★已修正', fg:'#96591A', bg:'#F6F4EF', v:5.11, lv:'AA', fix:'原 #A96A22 = 4.00 僅大字 AA' },
+  { t:'淺色', u:'守門色 on guard-soft', fg:'#9E4A4A', bg:'#F7E9E7', v:5.03, lv:'AA', fix:'—' },
+  { t:'淺色', u:'資訊色 on info-soft', fg:'#4A6B7C', bg:'#E6EEF2', v:4.85, lv:'AA', fix:'—' },
+  { t:'淺色', u:'實心主按鈕文字 on accent', fg:'#FFFFFF', bg:'#5E6E40', v:5.56, lv:'AA', fix:'—' },
+  /* ---- 深色主題（14 組）---- */
+  { t:'深色', u:'內文 on 頁面底色', fg:'#ECE8DF', bg:'#1E1C18', v:13.91, lv:'AAA', fix:'—' },
+  { t:'深色', u:'內文 on 卡片', fg:'#ECE8DF', bg:'#282621', v:12.36, lv:'AAA', fix:'—' },
+  { t:'深色', u:'內文 on surface-2', fg:'#ECE8DF', bg:'#2E2B25', v:11.54, lv:'AAA', fix:'—' },
+  { t:'深色', u:'次要文字 on 卡片', fg:'#ABA595', bg:'#282621', v:6.15, lv:'AA', fix:'—' },
+  { t:'深色', u:'次要文字 on 頁面底色', fg:'#ABA595', bg:'#1E1C18', v:6.92, lv:'AA', fix:'—' },
+  { t:'深色', u:'弱化文字 on 卡片 ★已修正', fg:'#9A9484', bg:'#282621', v:5.00, lv:'AA', fix:'原 #7C7768 = 3.38 僅大字 AA' },
+  { t:'深色', u:'弱化文字 on surface-2 ★已修正', fg:'#9A9484', bg:'#2E2B25', v:4.66, lv:'AA', fix:'原 #7C7768 = 3.15 僅大字 AA' },
+  { t:'深色', u:'弱化文字 on 頁面底色 ★已修正', fg:'#9A9484', bg:'#1E1C18', v:5.62, lv:'AA', fix:'原 #7C7768 = 3.80 僅大字 AA' },
+  { t:'深色', u:'強調 accent-ink on accent-soft', fg:'#C7D5A2', bg:'#2C3122', v:8.58, lv:'AAA', fix:'—' },
+  { t:'深色', u:'行動色 on action-soft', fg:'#DDA75C', bg:'#322718', v:6.78, lv:'AA', fix:'—' },
+  { t:'深色', u:'行動色 on 頁面底色', fg:'#DDA75C', bg:'#1E1C18', v:7.90, lv:'AAA', fix:'—' },
+  { t:'深色', u:'守門色 on guard-soft', fg:'#D68B8B', bg:'#331F1F', v:5.84, lv:'AA', fix:'—' },
+  { t:'深色', u:'資訊色 on info-soft', fg:'#9CBCCB', bg:'#1F2A30', v:7.31, lv:'AAA', fix:'—' },
+  { t:'深色', u:'實心主按鈕文字 on accent', fg:'#20241A', bg:'#AFC084', v:8.05, lv:'AAA', fix:'—' }
+];
+const A11Y = [
+  { s:'ok', t:'語意標籤（semantic HTML）',
+    d:'使用 <code>&lt;nav&gt;</code>／<code>&lt;footer&gt;</code>／<code>&lt;table&gt;+&lt;thead&gt;/&lt;th&gt;</code>／<code>&lt;ul&gt;/&lt;li&gt;</code>／<code>h1→h2→h3</code> 階層無跳級；表格皆有表頭列，非用 div 假裝表格。' },
+  { s:'ok', t:'可見的 focus 樣式',
+    d:'全站統一 <code>:focus-visible</code> 為 2.5px accent 外框 + 2px offset，未移除瀏覽器預設焦點（無 <code>outline:none</code> 而不補樣式的情形）。' },
+  { s:'ok', t:'鍵盤可操作',
+    d:'所有互動元件皆為原生 <code>&lt;button&gt;</code> / <code>&lt;a&gt;</code> / <code>&lt;select&gt;</code> / <code>&lt;input&gt;</code>，Tab 可達、Enter/Space 可觸發；彈窗 <kbd>Esc</kbd> 可關（M3／M5／M6／M7）。無「只有滑鼠能用」的 div 按鈕。' },
+  { s:'ok', t:'狀態不只用顏色表達',
+    d:'延遲／擋下／通過除了配色，同時有文字（DELAYED／已擋下／PASS）與符號（✓／✕／🚫），色盲使用者仍可辨識。' },
+  { s:'ok', t:'動態內容有 live region',
+    d:'toast 為 <code>role="status" aria-live="polite"</code>；狀態樣式庫容器 <code>aria-live="polite"</code>；錯誤區塊 <code>role="alert"</code>。' },
+  { s:'ok', t:'色彩對比（2026-07-25 已修正 · 淺色與深色兩主題全數達標）',
+    d:'修正配色已套用至 <b>M0–M8 九頁</b>、涵蓋<b>兩套主題</b>。重測結果：<b>淺色 14/14 達 AA 以上</b>（含 AAA 4）、<b>深色 14/14 達 AA 以上</b>（含 AAA 7）；<b>兩主題 FAIL 皆為 0、無「僅大字 AA」項</b>。修正三處：淺色 <code>--ink-faint #9C988C→#737060</code>、淺色 <code>--action #A96A22→#96591A</code>、深色 <code>--ink-faint #7C7768→#9A9484</code>。' },
+  { s:'part', t:'表單標籤與錯誤關聯',
+    d:'每個欄位都有可見 <code>&lt;label&gt;</code> 與錯誤訊息，但<b>尚未加 <code>for</code>／<code>aria-describedby</code> 正式關聯</b>；螢幕報讀器可能讀不到對應錯誤。列為後端接上前的補強項。' },
+  { s:'no', t:'螢幕報讀器實測',
+    d:'<b>未執行</b>。VoiceOver／NVDA 需人工操作，靜態預覽無法自證。列入人工驗收清單。' },
+  { s:'no', t:'放大 200% / 重排 400%',
+    d:'<b>未驗證</b>。<code>MOBILE = OUT_OF_SCOPE</code>，窄視窗重排未列入本輪範圍；桌機 1280px 以上為設計基準。' }
+];
+function renderA11y(){
+  let html = '';
+  ['淺色','深色'].forEach(theme=>{
+    const rows = CONTRAST.filter(c=>c.t===theme);
+    const aa   = rows.filter(c=>c.lv==='AA'||c.lv==='AAA').length;
+    const aaa  = rows.filter(c=>c.lv==='AAA').length;
+    const big  = rows.filter(c=>c.lv.indexOf('大字')>=0).length;
+    const fail = rows.filter(c=>c.lv==='FAIL').length;
+    html += `<tr class="sumrow"><td colspan="5" style="color:var(--accent-ink)">
+      ▍${esc(theme)}主題（${rows.length} 組）—— AA 以上 <b>${aa}/${rows.length}</b>（其中 AAA ${aaa}）　·　僅大字 AA <b>${big}</b>　·
+      <b style="color:${fail?'var(--guard)':'var(--accent-ink)'}">FAIL ${fail}</b></td></tr>`;
+    html += rows.map(c=>{
+      const cls = c.lv==='FAIL' ? 'block' : (c.lv.indexOf('大字')>=0 ? 'act' : 'pass');
+      return `<tr>
+        <td>${esc(c.u)}</td>
+        <td class="mono"><span class="swatch" style="background:${esc(c.fg)}"></span>${esc(c.fg)}
+          &nbsp;/&nbsp;<span class="swatch" style="background:${esc(c.bg)}"></span>${esc(c.bg)}</td>
+        <td class="num">${c.v.toFixed(2)}:1</td>
+        <td><span class="badge ${cls}">${esc(c.lv)}</span></td>
+        <td style="font-size:11.5px">${esc(c.fix)}</td>
+      </tr>`;
+    }).join('');
+  });
+  document.getElementById('contrastBody').innerHTML = html;
+  document.getElementById('a11yList').innerHTML = A11Y.map(a=>`
+    <li class="${a.s==='ok'?'ok':(a.s==='part'?'part':'no')}">
+      <span class="ic">${a.s==='ok'?'✓':(a.s==='part'?'◐':'✕')}</span>
+      <span><span class="t">${esc(a.t)}</span><br><span class="d">${a.d}</span></span>
+    </li>`).join('');
+}
+/* 正式配色＝已修正值（寫在 :root）；此開關只切到 data-a11y="legacy" 做「修正前」對照，不改任何檔案 */
+let A11Y_LEGACY = false;
+function toggleA11y(){
+  A11Y_LEGACY = !A11Y_LEGACY;
+  if(A11Y_LEGACY) document.documentElement.setAttribute('data-a11y','legacy');
+  else document.documentElement.removeAttribute('data-a11y');
+  document.getElementById('a11yBtn').textContent = A11Y_LEGACY ? '還原已修正配色（正式值）' : '切回修正前配色（對照觀看）';
+  document.getElementById('a11yBtn').className = 'minibtn ' + (A11Y_LEGACY ? 'danger' : 'act');
+  toast(A11Y_LEGACY
+    ? '目前顯示＝修正前舊配色（僅本頁對照用，檔案未變更）'
+    : '已還原正式配色：--ink-faint #737060 / --action #96591A');
+}
+
+/* =========================================================
+   7. 導航地圖
+   ========================================================= */
+const MAP = [
+  { m:'M0', f:'PROMOTION_UI_M0_WIREFRAME.html', t:'前台線稿 + 設計文件', pub:true,
+    d:'雙入口首頁、IA 圖、狀態示意、需求表單線稿；整套設計的起點。' },
+  { m:'M1', f:'PROMOTION_UI_M1_PREVIEW.html', t:'雙入口首頁', pub:true,
+    d:'推廣合作 vs 影音製作兩張大卡、ENTRY_TYPE 路由、四角色分流。' },
+  { m:'M2', f:'PROMOTION_UI_M2_PREVIEW.html', t:'推廣需求表單 + 送出完成', pub:true,
+    d:'課程互惠 14 題、4 步分段、草稿保存、必填驗證、防重複送出。' },
+  { m:'M3', f:'PROMOTION_UI_M3_PREVIEW.html', t:'內部審核與建案', pub:false,
+    d:'待審清單、單筆審核抽屜、4 種審核動作、退回／不承接必填 review_note、核准建案冪等。' },
+  { m:'M4', f:'PROMOTION_UI_M4_PREVIEW.html', t:'KOL 媒合（候選階段）', pub:false,
+    d:'多條件搜尋、8 筆虛構 KOL、批次選取、候選清單、三項防呆；此階段不扣額度。' },
+  { m:'M5', f:'PROMOTION_UI_M5_PREVIEW.html', t:'邀約與報價', pub:false,
+    d:'邀約樣板版本化、寄送前三項擋關、COPY_DRAFT／MAILTO 兩模式、額度 AVAILABLE→RESERVED→USED、報價比較表。' },
+  { m:'M6', f:'PROMOTION_UI_M6_PREVIEW.html', t:'任務與外包工單', pub:false,
+    d:'4 套任務範本、PromotionTasks 列表、工單 preview→confirm、四階段禁建、linkage 四欄、沿用既有 ServiceTemplates。' },
+  { m:'M7', f:'PROMOTION_UI_M7_PREVIEW.html', t:'上架、成效與財務結案', pub:false,
+    d:'逐 KOL 交付追蹤（延遲必填原因）、成效回填與內部核實、案件 Dashboard、每位 KOL 獨立財務、結案檢查清單。' },
+  { m:'M8', f:'PROMOTION_UI_M8_PREVIEW.html', t:'全流程與視覺整理（本頁）', pub:false,
+    d:'三套狀態機泳道圖、跨案總覽、狀態樣式庫、權限矩陣、用語表、無障礙檢查、導航地圖。' }
+];
+function renderMap(){
+  document.getElementById('mapGrid').innerHTML = MAP.map(x=>`
+    <a class="mapcard ${x.pub?'ext':''}" href="${esc(x.f)}">
+      <span class="m">${esc(x.m)}</span>
+      <h4>${esc(x.t)}</h4>
+      <p>${esc(x.d)}</p>
+      <span class="who ${x.pub?'pub':'int'}">${x.pub?'對外可見':'對內 🔒 需登入'}</span>
+    </a>`).join('');
+}
+
+/* ---------- toast ---------- */
+let toastTimer = null;
+function toast(msg, bad){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast on' + (bad?' bad':'');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.className='toast', 3600);
+}
+
+/* ---------- init ---------- */
+showSM('REQ');
+renderKpi();
+setGroup('FLAT');
+showState('EMPTY');
+renderPerm();
+renderTerms();
+renderA11y();
+renderMap();
+</script>
+</body>
+</html>
