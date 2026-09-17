@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex,nofollow">
+<title>合作推廣系統｜內部流程測試</title>
+<style>
+  :root{
+    --bg:#F6F4EF; --surface:#FFFFFF; --surface2:#FBFAF6; --line:#E7E2D6;
+    --ink:#2B2A26; --ink-soft:#6B665C; --ink-faint:#928C7E;
+    --accent:#5E6E40; --accent-soft:#EAEFE0;
+    --action:#96591A; --action-soft:#F6E9D8;
+    --guard:#9E4A4A; --guard-soft:#F4E2E0;
+    --info:#3A6B7E; --info-soft:#E1EDF1;
+    --radius:14px; --radius-sm:9px; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    color-scheme:light;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"PingFang TC","Noto Sans TC",system-ui,-apple-system,"Helvetica Neue",Arial,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:20px 18px 60px}
+  .topbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:6px 2px 14px}
+  .topbar .title{font-weight:750;font-size:15px}
+  .badge{font-size:12px;font-weight:700;color:var(--action);background:var(--action-soft);border-radius:999px;padding:4px 11px}
+  .banner{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 12px;background:var(--action-soft);color:var(--action);border:1px solid var(--action);border-radius:var(--radius);padding:10px 16px;margin-bottom:16px;font-size:13.5px}
+  .banner b{font-weight:750}.banner .sub{color:var(--ink-soft);font-size:12.5px}
+  .intro{background:var(--info-soft);border:1px solid var(--info);border-radius:var(--radius);padding:16px 18px;margin-bottom:16px}
+  .intro h3{margin:0 0 8px;font-size:15px;color:var(--info)} .intro p{margin:0 0 8px;font-size:13.5px;color:var(--ink-soft)}
+  .progress{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+  .prog{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-faint);background:var(--surface2);border:1px solid var(--line);border-radius:999px;padding:5px 11px 5px 6px}
+  .prog .dot{display:inline-flex;align-items:center;justify-content:center;width:19px;height:19px;border-radius:50%;background:var(--line);color:#fff;font-size:11px;font-weight:700}
+  .prog.current{color:var(--accent);border-color:var(--accent);background:var(--accent-soft)} .prog.current .dot{background:var(--accent)}
+  .prog.done{color:var(--accent)} .prog.done .dot{background:var(--accent)}
+  .wrap2{display:grid;grid-template-columns:minmax(280px,330px) 1fr;gap:14px;align-items:start}
+  @media(max-width:820px){.wrap2{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;box-shadow:0 1px 2px rgba(43,42,38,.05),0 5px 16px rgba(43,42,38,.04)}
+  .scenario .tag{display:inline-block;font-size:11px;font-weight:700;color:var(--action);background:var(--action-soft);border-radius:var(--radius-sm);padding:3px 9px;margin-bottom:8px}
+  .scenario h3{margin:0 0 12px;font-size:15px}
+  .kv{display:flex;gap:10px;margin-bottom:8px;font-size:13px} .kv .k{color:var(--ink-faint);flex:0 0 60px}
+  .state{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .chip{font-size:12px;font-weight:650;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:4px 11px}
+  .chip.b{color:var(--info);background:var(--info-soft)} .chip.c{color:var(--action);background:var(--action-soft)}
+  .step-head{font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:4px}
+  .step h2{margin:0 0 14px;font-size:19px}
+  .say{font-size:14px;line-height:1.6;margin:0 0 10px} .say .k{display:block;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--ink-faint);text-transform:uppercase;margin-bottom:2px}
+  .expect{color:var(--ink-soft)}
+  .cand{list-style:none;padding:0;margin:0 0 12px;display:flex;flex-direction:column;gap:6px}
+  .cand li{display:flex;justify-content:space-between;gap:10px;font-size:13px;background:var(--surface2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px 12px}
+  .cand li.sel{border-color:var(--accent);background:var(--accent-soft)} .cand li span{color:var(--ink-faint);font-size:12px}
+  .actions{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:14px 0 6px}
+  .quote{font-size:13px;font-weight:650;background:var(--surface2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:8px 12px}
+  .hint{font-size:12.5px;color:var(--accent);min-height:18px;margin:2px 0 0}
+  .btn{font:inherit;font-size:13.5px;font-weight:650;border-radius:var(--radius-sm);padding:9px 16px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:all .12s}
+  .btn:hover:not(:disabled){border-color:var(--ink-faint)} .btn:disabled{opacity:.45;cursor:default}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff} .btn.primary:hover:not(:disabled){background:#4e5c35}
+  .btn.guard{background:var(--guard-soft);border-color:var(--guard);color:var(--guard)} .btn.ghost{background:transparent}
+  .btn.sm{padding:6px 12px;font-size:12.5px}
+  .nav{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
+  .fb{margin-top:16px;padding-top:14px;border-top:1px dashed var(--line)}
+  .fb-toggle{font:inherit;font-size:13px;color:var(--info);background:none;border:none;cursor:pointer;padding:0} .fb-toggle b{color:var(--accent)}
+  .fb-body{margin-top:10px} .fb-body label{display:block;font-size:12.5px;color:var(--ink-soft);margin-bottom:6px}
+  textarea{width:100%;box-sizing:border-box;font:inherit;font-size:13.5px;line-height:1.5;border:1px solid var(--line);border-radius:var(--radius-sm);padding:9px 11px;resize:vertical;min-height:64px;background:var(--surface);color:var(--ink)}
+  textarea:focus{outline:none;border-color:var(--accent)}
+  .fb-actions{display:flex;align-items:center;gap:8px;margin-top:8px} .fb-saved,.copy-note{font-size:12px;color:var(--accent)}
+  .done{max-width:620px;margin:0 auto;text-align:center}
+  .done-badge{width:52px;height:52px;border-radius:50%;background:var(--accent);color:#fff;font-size:26px;display:flex;align-items:center;justify-content:center;margin:4px auto 12px}
+  .done h2{margin:0 0 8px;font-size:22px} .done-sub{color:var(--ink-soft);font-size:14px;margin:0 0 16px}
+  .check{list-style:none;padding:0;margin:0 auto 20px;display:inline-flex;flex-direction:column;gap:5px;text-align:left;color:var(--accent);font-size:14px}
+  .overall{text-align:left;border-top:1px solid var(--line);padding-top:16px} .overall h3{font-size:15px;margin:0 0 10px}
+  .overall label{display:block;font-size:12.5px;color:var(--ink-soft);margin:10px 0 6px}
+  .summary{text-align:left;margin-top:16px} .summary-head{font-size:13px;color:var(--ink-soft);margin-bottom:8px}
+  .summary-pre{background:var(--surface2);border:1px solid var(--line);border-radius:var(--radius-sm);padding:14px;font-family:var(--mono);font-size:12px;line-height:1.55;white-space:pre-wrap;word-break:break-word;max-height:300px;overflow:auto;margin:0}
+  .done-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:16px}
+  .modal{position:fixed;inset:0;background:rgba(43,42,38,.4);display:flex;align-items:center;justify-content:center;z-index:80;padding:20px}
+  .modal-card{background:var(--surface);border-radius:var(--radius);padding:22px 24px;max-width:400px}
+  .modal-card h3{margin:0 0 8px} .modal-card p{margin:0 0 16px;font-size:14px;color:var(--ink-soft)}
+  .modal-actions{display:flex;justify-content:flex-end;gap:10px}
+  .footer{color:var(--ink-faint);font-size:12px;text-align:center;margin-top:28px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar"><span class="title">合作推廣系統</span><span class="badge">內部流程測試</span><span class="badge" style="color:var(--info);background:var(--info-soft)">模擬資料</span></div>
+  <div id="app"></div>
+  <div class="footer">SDH 盛德好 · 內部測試 · 全程模擬資料，不會修改任何正式案件</div>
+</div>
+<script>
+"use strict";
+var KEY='sdh_uat_full_v1';
+var SC={ label:'測試資料', client:'晨光生活品牌', subject:'晨光生活品牌 × Podcast 新品推廣',
+  brief:'想邀請一位生活風格 KOL，在 Podcast 上介紹本季新品，檔期約兩週，預算彈性。',
+  contact:'品牌行銷 · 林小姐', candidates:[{n:'林小晴',d:'生活風格 · 女性聽眾為主'},{n:'陳安安',d:'美食旅遊 · 互動率高'},{n:'李宇翔',d:'科技開箱 · 年輕族群'}],
+  selected:'林小晴', quote:30000 };
+var STEPS=[
+  {k:'req',    label:'查看合作需求'},
+  {k:'review', label:'需求審核'},
+  {k:'approve',label:'核准並轉為專案'},
+  {k:'cand',   label:'查看候選 KOL'},
+  {k:'draft',  label:'建立邀約草稿'},
+  {k:'send',   label:'模擬寄送邀約'},
+  {k:'resp',   label:'記錄對方回覆'},
+  {k:'quote',  label:'記錄報價'},
+  {k:'nego',   label:'進入洽談'},
+  {k:'confirm',label:'確認合作'}
+];
+var STEP_NAMES=['','查看合作需求','需求審核','核准並轉為專案','查看候選 KOL','建立邀約草稿','模擬寄送邀約','記錄對方回覆','記錄報價','進入洽談','確認合作'];
+var REQ_LABEL={SUBMITTED:'已送件',UNDER_REVIEW:'審核中',APPROVED:'已核准（已轉專案）'};
+var MATCH_LABEL={NONE:'—',CANDIDATE:'候選人',INVITATION_DRAFT:'邀約草稿',INVITED:'已邀約',INTERESTED:'有意願',QUOTED:'已報價',NEGOTIATING:'洽談中',CONFIRMED:'已確認合作'};
+var INV_LABEL={NONE:'—',DRAFT:'草稿',SENT:'已寄出',RESPONDED:'已回覆'};
+
+function fresh(){ return {step:1, request:'SUBMITTED', match:'NONE', invitation:'NONE', response:null, quoted:false, feedback:{}, overall:'', priority:''}; }
+function load(){ try{var r=sessionStorage.getItem(KEY); if(r){var s=JSON.parse(r); if(s&&s.request) return s;}}catch(e){} return fresh(); }
+function save(s){ try{sessionStorage.setItem(KEY,JSON.stringify(s));}catch(e){} }
+function reset(){ try{sessionStorage.removeItem(KEY);}catch(e){} }
+function esc(x){ return String(x==null?'':x).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+var $=function(sel){return document.querySelector(sel);};
+
+// Guarded simulation adapter — pure client state; NO network of any kind.
+var SIM={
+  openReview:function(s){ if(s.request!=='SUBMITTED')return{ok:false}; s.request='UNDER_REVIEW'; return{ok:true}; },
+  approve:function(s){ if(s.request!=='UNDER_REVIEW')return{ok:false}; s.request='APPROVED'; s.match='CANDIDATE'; return{ok:true}; },
+  createDraft:function(s){ if(s.match!=='CANDIDATE')return{ok:false}; s.match='INVITATION_DRAFT'; s.invitation='DRAFT'; return{ok:true}; },
+  copy:function(s){ return{ok:true,no:true}; }, mailto:function(s){ return{ok:true,no:true}; },
+  dispatch:function(s){ if(s.match!=='INVITATION_DRAFT')return{ok:false}; s.invitation='SENT'; s.match='INVITED'; return{ok:true}; },
+  interested:function(s){ if(s.match!=='INVITED')return{ok:false}; s.invitation='RESPONDED'; s.response='INTERESTED'; s.match='INTERESTED'; return{ok:true}; },
+  quote:function(s){ if(s.match!=='INTERESTED')return{ok:false}; s.match='QUOTED'; s.quoted=true; return{ok:true}; },
+  nego:function(s){ if(s.match!=='QUOTED')return{ok:false}; s.match='NEGOTIATING'; return{ok:true}; },
+  confirm:function(s){ if(s.match!=='NEGOTIATING')return{ok:false}; s.match='CONFIRMED'; return{ok:true}; }
+};
+
+function buildReport(s){
+  var L=[]; L.push('# 合作推廣系統｜內部測試回饋','','## 測試結果','','- 測試狀態：已完成','- 完成步驟：10 / 10','- 測試模式：模擬資料','- 正式案件修改：無','','## 各步驟回饋','');
+  for(var i=1;i<=10;i++){ L.push('### Step '+i+'｜'+STEP_NAMES[i]); var f=(s.feedback&&s.feedback[i]&&String(s.feedback[i]).trim())?String(s.feedback[i]).trim():'沒有特別問題'; L.push('回饋：',f,''); }
+  L.push('## 整體感受','',(s.overall&&s.overall.trim())?s.overall.trim():'（未填寫）','','## 最想先改善的一件事','',(s.priority&&s.priority.trim())?s.priority.trim():'（未填寫）','');
+  return L.join('\n');
+}
+function hasFb(s){ if(s.overall&&s.overall.trim())return true; if(s.priority&&s.priority.trim())return true; if(s.feedback)for(var k in s.feedback){if(s.feedback[k]&&String(s.feedback[k]).trim())return true;} return false; }
+
+function bannerHtml(){ return '<div class="banner">🧪 <b>內部流程測試｜模擬資料</b><span class="sub">全程模擬「'+esc(SC.label)+'」，不會修改任何正式案件，也不會寄出任何 Email。</span></div>'; }
+function introHtml(){ return '<div class="intro"><h3>開始前，先說明一下 👇</h3><p>你會扮演承辦，用一組<b>練習資料</b>，從「收到需求」一路走到「確認合作」，中間也會經過<b>需求審核與核准</b>。每一步都會告訴你要做什麼、應該看到什麼。</p><p>過程中若有看不懂或卡住，<b>每一步下方都能直接留下回饋</b>；完成後系統會自動整理成一份紀錄，按「<b>複製完整測試回饋</b>」貼回給 Winnie 就好。</p></div>'; }
+function scenarioHtml(s){
+  return '<div class="tag">'+esc(SC.label)+'</div><h3>'+esc(SC.subject)+'</h3>'+
+    '<div class="kv"><span class="k">案主</span><span>'+esc(SC.client)+'</span></div>'+
+    '<div class="kv"><span class="k">聯絡人</span><span>'+esc(SC.contact)+'</span></div>'+
+    '<div class="kv"><span class="k">需求</span><span>'+esc(SC.brief)+'</span></div>'+
+    '<div class="kv"><span class="k">選定 KOL</span><span>'+esc(SC.selected)+'</span></div>'+
+    '<div class="state"><span class="chip c">需求：'+esc(REQ_LABEL[s.request]||s.request)+'</span>'+
+      '<span class="chip">媒合：'+esc(MATCH_LABEL[s.match]||s.match)+'</span>'+
+      '<span class="chip b">邀約：'+esc(INV_LABEL[s.invitation]||s.invitation)+'</span></div>';
+}
+function say(a,b){ return '<p class="say"><span class="k">這一步請做什麼</span>'+esc(a)+'</p><p class="say expect"><span class="k">完成後你應該看到</span>'+esc(b)+'</p>'; }
+function btn(label,kind,id,dis){ return '<button class="btn'+(kind?' '+kind:'')+'" data-a="'+id+'"'+(dis?' disabled':'')+'>'+esc(label)+'</button>'; }
+function navRow(needAction){ return '<div class="nav"><button class="btn primary" data-a="next"'+(needAction?' disabled':'')+'>下一步 →</button><button class="btn ghost" data-a="restart">重新開始測試</button></div>'; }
+
+function stepBody(step,s){
+  switch(step.k){
+    case 'req': return say('先看左邊這筆合作需求，了解案主想做什麼。','了解「'+SC.client+'」想邀 KOL 做 Podcast 新品推廣，狀態是「已送件」。')+navRow(false);
+    case 'review': return say('這筆需求要先進審核。點「開始審核」。','需求狀態變成「審核中」。')+'<div class="actions">'+btn('開始審核','primary','review')+'</div>'+'<p class="hint" data-h="review"></p>'+navRow(true);
+    case 'approve': return say('內容沒問題，點「核准」把它轉成一個正式合作專案。','需求變「已核准（已轉專案）」，媒合開始於「候選人」。')+'<div class="actions">'+btn('核准並轉為專案','primary','approve')+'</div>'+'<p class="hint" data-h="approve"></p>'+navRow(true);
+    case 'cand': return say('看一下三位候選 KOL，我們這次選定「'+SC.selected+'」。','候選名單：'+SC.candidates.map(function(c){return c.n;}).join('、')+'。')+'<ul class="cand">'+SC.candidates.map(function(c){return '<li'+(c.n===SC.selected?' class="sel"':'')+'><b>'+esc(c.n)+'</b><span>'+esc(c.d)+(c.n===SC.selected?' · 已選定':'')+'</span></li>';}).join('')+'</ul>'+navRow(false);
+    case 'draft': return say('替選定的 KOL 建立一封邀約草稿。','媒合狀態變成「邀約草稿」。')+'<div class="actions">'+btn('建立邀約草稿','primary','draft')+'</div>'+'<p class="hint" data-h="draft"></p>'+navRow(true);
+    case 'send': return say('邀約是「人工寄送」：可先複製內容或開啟 Email（這兩個不會改狀態），實際寄出後再點「模擬確認已完成寄送」。','點「模擬確認已完成寄送」後，邀約變「已寄出」、媒合變「已邀約」。')+'<div class="actions">'+btn('複製邀約內容','ghost','copy')+btn('開啟 Email','ghost','mailto')+btn('模擬確認已完成寄送','primary','dispatch')+'</div>'+'<p class="hint" data-h="send"></p>'+navRow(true);
+    case 'resp': return say('對方回覆了，這次請記錄「有意願」。','媒合變「有意願」。（提醒：已逾期／尚未回覆都不等於婉拒）')+'<div class="actions">'+btn('記錄：有意願','primary','interested')+btn('記錄：婉拒','guard','declined')+'</div>'+'<p class="hint" data-h="resp"></p>'+navRow(true);
+    case 'quote': return say('記錄這次的合作報價。','報價 NT$ '+SC.quote.toLocaleString()+' 已記錄，媒合變「已報價」。')+'<div class="actions"><span class="quote">測試報價：NT$ '+esc(SC.quote.toLocaleString())+'</span>'+btn('記錄報價','primary','quote')+'</div>'+'<p class="hint" data-h="quote"></p>'+navRow(true);
+    case 'nego': return say('進入洽談階段。','媒合變「洽談中」。')+'<div class="actions">'+btn('進入洽談','primary','nego')+'</div>'+'<p class="hint" data-h="nego"></p>'+navRow(true);
+    case 'confirm': return say('雙方談定，確認合作！','媒合變「已確認合作」，接著會看到「測試完成」。')+'<div class="actions">'+btn('確認合作','primary','confirm')+'</div>'+'<p class="hint" data-h="confirm"></p>'+navRow(true);
+  }
+  return '';
+}
+function fbWidget(n,s){
+  var has=!!(s.feedback&&s.feedback[n]&&String(s.feedback[n]).trim());
+  return '<div class="fb"><button class="fb-toggle" data-a="fb-toggle">'+(has?'💬 <b>✓ 已記錄回饋</b>（點此修改）':'💬 這一步有想法？留下回饋')+'</button>'+
+    '<div class="fb-body"'+(has?'':' hidden')+'><label>這一步有沒有哪裡看不懂、卡住，或覺得需要調整？</label>'+
+    '<textarea data-a="fb-text" placeholder="例如：我不知道這個按鈕做什麼／找不到下一步／這個名稱看不懂／資訊太多／這一步很清楚">'+(has?esc(s.feedback[n]):'')+'</textarea>'+
+    '<div class="fb-actions">'+btn('記下這個回饋','primary sm','fb-save')+(has?btn('清除','ghost sm','fb-clear'):'')+'<span class="fb-saved" data-a="fb-saved"></span></div></div></div>';
+}
+
+function render(){
+  var s=load(), total=STEPS.length;
+  if(s.step>total){ renderDone(s); return; }
+  var idx=s.step-1, step=STEPS[idx];
+  $('#app').innerHTML = bannerHtml() + (s.step===1?introHtml():'') +
+    '<div class="progress">'+STEPS.map(function(st,i){var c=i<idx?'done':(i===idx?'current':'todo');var m=i<idx?'✓':(i+1);return '<div class="prog '+c+'"><span class="dot">'+m+'</span><span>'+esc(st.label)+'</span></div>';}).join('')+'</div>'+
+    '<div class="wrap2"><div class="card scenario">'+scenarioHtml(s)+'</div>'+
+    '<div class="card step"><div class="step-head">步驟 '+s.step+' / '+total+'</div><h2>'+esc(step.label)+'</h2>'+stepBody(step,s)+fbWidget(s.step,s)+'</div></div>';
+  wire(step,s);
+}
+function renderDone(s){
+  var report=buildReport(s);
+  $('#app').innerHTML = bannerHtml()+
+    '<div class="card done"><div class="done-badge">✓</div><h2>測試完成，謝謝你！</h2>'+
+    '<p class="done-sub">你剛完成了一次「合作推廣」從收到需求、審核核准，到邀約、報價、確認合作的完整流程。</p>'+
+    '<ul class="check">'+['查看需求','需求審核','核准轉專案','查看候選','建立邀約','模擬寄送','記錄回覆','報價','洽談','確認合作'].map(function(t){return '<li>✓ '+esc(t)+'</li>';}).join('')+'</ul>'+
+    '<div class="overall"><h3>整體感受（選填）</h3><label>整體使用下來，還有沒有什麼地方你覺得需要調整？</label><textarea data-a="overall" placeholder="想到什麼寫什麼，沒有也沒關係">'+esc(s.overall||'')+'</textarea>'+
+    '<label>如果今天真的拿來工作，你最希望先改善哪一件事？</label><textarea data-a="priority" placeholder="一句話就好">'+esc(s.priority||'')+'</textarea></div>'+
+    '<div class="summary"><div class="summary-head">你留下的回饋，已經幫你整理好了：</div><pre class="summary-pre" data-a="summary">'+esc(report)+'</pre></div>'+
+    '<div class="done-actions"><button class="btn primary" data-a="copy2">複製完整測試回饋</button><button class="btn" data-a="download">下載 Markdown</button><span class="copy-note" data-a="note"></span></div>'+
+    '<div style="margin-top:16px">'+btn('重新開始測試','ghost','restart')+'</div></div>';
+  var refresh=function(){var p=$('[data-a="summary"]');if(p)p.textContent=buildReport(s);};
+  var ov=$('[data-a="overall"]'); if(ov)ov.oninput=function(){s.overall=ov.value;save(s);refresh();};
+  var pr=$('[data-a="priority"]'); if(pr)pr.oninput=function(){s.priority=pr.value;save(s);refresh();};
+  var note=$('[data-a="note"]');
+  var c2=$('[data-a="copy2"]'); if(c2)c2.onclick=function(){var t=buildReport(s);function ok(){if(note)note.textContent='已複製，可以直接貼給 Winnie。';} try{if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(ok,function(){fallbackCopy(t);ok();});}else{fallbackCopy(t);ok();}}catch(e){fallbackCopy(t);ok();}};
+  var dl=$('[data-a="download"]'); if(dl)dl.onclick=function(){downloadMd(buildReport(s));if(note)note.textContent='已下載 Markdown 檔。';};
+  var rb=$('[data-a="restart"]'); if(rb)rb.onclick=function(){confirmRestart(s);};
+}
+function fallbackCopy(t){try{var ta=document.createElement('textarea');ta.value=t;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);}catch(e){}}
+function downloadMd(t){try{var d=new Date();function p(n){return(n<10?'0':'')+n;}var fn='合作推廣系統_測試回饋_'+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'_'+p(d.getHours())+p(d.getMinutes())+'.md';var b=new Blob([t],{type:'text/markdown;charset=utf-8'});var u=URL.createObjectURL(b);var a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(u);},1500);}catch(e){}}
+function confirmRestart(s){ if(!hasFb(s)){reset();render();return;} var h=document.createElement('div');h.className='modal';h.innerHTML='<div class="modal-card"><h3>要重新開始嗎？</h3><p>重新開始會清除這次測試留下的回饋，確定要重新開始嗎？</p><div class="modal-actions"><button class="btn ghost" data-a="c">取消</button><button class="btn guard" data-a="o">重新開始</button></div></div>';document.body.appendChild(h);h.querySelector('[data-a="c"]').onclick=function(){document.body.removeChild(h);};h.querySelector('[data-a="o"]').onclick=function(){document.body.removeChild(h);reset();render();};}
+
+function setHint(k,t){var el=$('[data-h="'+k+'"]');if(el)el.textContent=t;}
+function advance(s){s.step+=1;save(s);render();}
+function wire(step,s){
+  var next=$('[data-a="next"]'); function done(){if(next)next.disabled=false;}
+  if(next)next.onclick=function(){if(!next.disabled)advance(s);};
+  var rb=$('[data-a="restart"]'); if(rb)rb.onclick=function(){confirmRestart(s);};
+  function on(a,fn){var b=$('[data-a="'+a+'"]');if(b)b.onclick=fn;}
+  function reflect(){var sc=$('.scenario');if(sc)sc.innerHTML=scenarioHtml(s);}
+  switch(step.k){
+    case 'req': case 'cand': break;
+    case 'review': on('review',function(){if(SIM.openReview(s).ok){save(s);done();reflect();this.disabled=true;setHint('review','已進入審核中。');}}); break;
+    case 'approve': on('approve',function(){if(SIM.approve(s).ok){save(s);done();reflect();this.disabled=true;setHint('approve','已核准並轉成專案，開始媒合。');}}); break;
+    case 'draft': on('draft',function(){if(SIM.createDraft(s).ok){save(s);done();reflect();this.disabled=true;setHint('draft','邀約草稿已建立。');}}); break;
+    case 'send':
+      on('copy',function(){SIM.copy(s);setHint('send','已複製邀約內容（示範用，狀態沒有改變）。');});
+      on('mailto',function(){SIM.mailto(s);setHint('send','已開啟 Email 示範（狀態沒有改變）。真正寄出後再按下一顆。');});
+      on('dispatch',function(){if(SIM.dispatch(s).ok){save(s);done();reflect();this.disabled=true;setHint('send','已標記「已寄出」，媒合進到「已邀約」。');}}); break;
+    case 'resp':
+      on('interested',function(){if(SIM.interested(s).ok){save(s);done();reflect();this.disabled=true;setHint('resp','已記錄「有意願」。');}});
+      on('declined',function(){setHint('resp','這次示範走「有意願」這條線，請改點「記錄：有意願」繼續。');}); break;
+    case 'quote': on('quote',function(){if(SIM.quote(s).ok){save(s);done();reflect();this.disabled=true;setHint('quote','報價已記錄。');}}); break;
+    case 'nego': on('nego',function(){if(SIM.nego(s).ok){save(s);done();reflect();this.disabled=true;setHint('nego','已進入洽談。');}}); break;
+    case 'confirm': on('confirm',function(){if(SIM.confirm(s).ok){save(s);done();reflect();this.disabled=true;setHint('confirm','已確認合作！');}}); break;
+  }
+  // feedback widget wiring
+  var tg=$('[data-a="fb-toggle"]'), body=$('.fb-body'), text=$('[data-a="fb-text"]'), fsave=$('[data-a="fb-save"]'), fclr=$('[data-a="fb-clear"]'), fsaved=$('[data-a="fb-saved"]');
+  if(tg)tg.onclick=function(){if(body){body.hidden=!body.hidden;if(!body.hidden&&text)text.focus();}};
+  if(fsave)fsave.onclick=function(){var v=text?text.value:'';if(!s.feedback)s.feedback={};if(v&&v.trim())s.feedback[s.step]=v.trim();else delete s.feedback[s.step];save(s);if(fsaved){fsaved.textContent='已記下';setTimeout(render,300);}};
+  if(fclr)fclr.onclick=function(){if(s.feedback)delete s.feedback[s.step];save(s);render();};
+}
+render();
+</script>
+</body>
+</html>
