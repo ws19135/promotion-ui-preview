@@ -87,14 +87,13 @@
 </div>
 <script>
 "use strict";
-var KEY='sdh_uat_full_v1';
+var KEY='sdh_uat_full_v2';
 var SC={ label:'測試資料', client:'晨光生活品牌', subject:'晨光生活品牌 × Podcast 新品推廣',
   brief:'想邀請一位生活風格 KOL，在 Podcast 上介紹本季新品，檔期約兩週，預算彈性。',
   contact:'品牌行銷 · 林小姐', candidates:[{n:'林小晴',d:'生活風格 · 女性聽眾為主'},{n:'陳安安',d:'美食旅遊 · 互動率高'},{n:'李宇翔',d:'科技開箱 · 年輕族群'}],
   selected:'林小晴', quote:30000 };
 var STEPS=[
-  {k:'req',    label:'查看合作需求'},
-  {k:'review', label:'需求審核'},
+  {k:'req',    label:'查看並審核需求'},
   {k:'approve',label:'核准並轉為專案'},
   {k:'cand',   label:'查看候選 KOL'},
   {k:'draft',  label:'建立邀約草稿'},
@@ -104,7 +103,24 @@ var STEPS=[
   {k:'nego',   label:'進入洽談'},
   {k:'confirm',label:'確認合作'}
 ];
-var STEP_NAMES=['','查看合作需求','需求審核','核准並轉為專案','查看候選 KOL','建立邀約草稿','模擬寄送邀約','記錄對方回覆','記錄報價','進入洽談','確認合作'];
+var STEP_NAMES=['','查看並審核需求','核准並轉為專案','查看候選 KOL','建立邀約草稿','模擬寄送邀約','記錄對方回覆','記錄報價','進入洽談','確認合作'];
+var TOTAL_STEPS=STEPS.length;
+var MATCH_ORDER={NONE:0,CANDIDATE:1,INVITATION_DRAFT:2,INVITED:3,INTERESTED:4,QUOTED:5,NEGOTIATING:6,CONFIRMED:7};
+// Whether THIS step's required action is already done, derived from state s
+// (so re-renders — e.g. after saving feedback mid-step — never re-lock 下一步).
+function actionDone(k,s){
+  switch(k){
+    case 'req': case 'cand': return true;            // read-only, no action
+    case 'approve': return s.request==='APPROVED';
+    case 'draft':   return MATCH_ORDER[s.match]>=2;
+    case 'send':    return MATCH_ORDER[s.match]>=3;
+    case 'resp':    return MATCH_ORDER[s.match]>=4;
+    case 'quote':   return s.quoted===true;
+    case 'nego':    return MATCH_ORDER[s.match]>=6;
+    case 'confirm': return s.match==='CONFIRMED';
+  }
+  return true;
+}
 var REQ_LABEL={SUBMITTED:'已送件',UNDER_REVIEW:'審核中',APPROVED:'已核准（已轉專案）'};
 var MATCH_LABEL={NONE:'—',CANDIDATE:'候選人',INVITATION_DRAFT:'邀約草稿',INVITED:'已邀約',INTERESTED:'有意願',QUOTED:'已報價',NEGOTIATING:'洽談中',CONFIRMED:'已確認合作'};
 var INV_LABEL={NONE:'—',DRAFT:'草稿',SENT:'已寄出',RESPONDED:'已回覆'};
@@ -118,8 +134,7 @@ var $=function(sel){return document.querySelector(sel);};
 
 // Guarded simulation adapter — pure client state; NO network of any kind.
 var SIM={
-  openReview:function(s){ if(s.request!=='SUBMITTED')return{ok:false}; s.request='UNDER_REVIEW'; return{ok:true}; },
-  approve:function(s){ if(s.request!=='UNDER_REVIEW')return{ok:false}; s.request='APPROVED'; s.match='CANDIDATE'; return{ok:true}; },
+  approve:function(s){ if(s.request!=='SUBMITTED'&&s.request!=='UNDER_REVIEW')return{ok:false}; s.request='APPROVED'; s.match='CANDIDATE'; return{ok:true}; },
   createDraft:function(s){ if(s.match!=='CANDIDATE')return{ok:false}; s.match='INVITATION_DRAFT'; s.invitation='DRAFT'; return{ok:true}; },
   copy:function(s){ return{ok:true,no:true}; }, mailto:function(s){ return{ok:true,no:true}; },
   dispatch:function(s){ if(s.match!=='INVITATION_DRAFT')return{ok:false}; s.invitation='SENT'; s.match='INVITED'; return{ok:true}; },
@@ -130,15 +145,15 @@ var SIM={
 };
 
 function buildReport(s){
-  var L=[]; L.push('# 合作推廣系統｜內部測試回饋','','## 測試結果','','- 測試狀態：已完成','- 完成步驟：10 / 10','- 測試模式：模擬資料','- 正式案件修改：無','','## 各步驟回饋','');
-  for(var i=1;i<=10;i++){ L.push('### Step '+i+'｜'+STEP_NAMES[i]); var f=(s.feedback&&s.feedback[i]&&String(s.feedback[i]).trim())?String(s.feedback[i]).trim():'沒有特別問題'; L.push('回饋：',f,''); }
+  var L=[]; L.push('# 合作推廣系統｜內部測試回饋','','## 測試結果','','- 測試狀態：已完成','- 完成步驟：'+TOTAL_STEPS+' / '+TOTAL_STEPS,'- 測試模式：模擬資料','- 正式案件修改：無','','## 各步驟回饋','');
+  for(var i=1;i<=TOTAL_STEPS;i++){ L.push('### Step '+i+'｜'+STEP_NAMES[i]); var f=(s.feedback&&s.feedback[i]&&String(s.feedback[i]).trim())?String(s.feedback[i]).trim():'沒有特別問題'; L.push('回饋：',f,''); }
   L.push('## 整體感受','',(s.overall&&s.overall.trim())?s.overall.trim():'（未填寫）','','## 最想先改善的一件事','',(s.priority&&s.priority.trim())?s.priority.trim():'（未填寫）','');
   return L.join('\n');
 }
 function hasFb(s){ if(s.overall&&s.overall.trim())return true; if(s.priority&&s.priority.trim())return true; if(s.feedback)for(var k in s.feedback){if(s.feedback[k]&&String(s.feedback[k]).trim())return true;} return false; }
 
 function bannerHtml(){ return '<div class="banner">🧪 <b>內部流程測試｜模擬資料</b><span class="sub">全程模擬「'+esc(SC.label)+'」，不會修改任何正式案件，也不會寄出任何 Email。</span></div>'; }
-function introHtml(){ return '<div class="intro"><h3>開始前，先說明一下 👇</h3><p>你會扮演承辦，用一組<b>練習資料</b>，從「收到需求」一路走到「確認合作」，中間也會經過<b>需求審核與核准</b>。每一步都會告訴你要做什麼、應該看到什麼。</p><p>過程中若有看不懂或卡住，<b>每一步下方都能直接留下回饋</b>；完成後系統會自動整理成一份紀錄，按「<b>複製完整測試回饋</b>」貼回給 Winnie 就好。</p></div>'; }
+function introHtml(){ return '<div class="intro"><h3>開始前，先說明一下 👇</h3><p>你會扮演承辦，用一組<b>練習資料</b>，從「收到並審核需求」一路走到「確認合作」。每一步都會告訴你要做什麼、應該看到什麼。</p><p>過程中若有看不懂或卡住，<b>每一步下方都能直接留下回饋</b>；完成後系統會自動整理成一份紀錄，按「<b>複製完整測試回饋</b>」貼回給 Winnie 就好。</p></div>'; }
 function scenarioHtml(s){
   return '<div class="tag">'+esc(SC.label)+'</div><h3>'+esc(SC.subject)+'</h3>'+
     '<div class="kv"><span class="k">案主</span><span>'+esc(SC.client)+'</span></div>'+
@@ -155,16 +170,15 @@ function navRow(needAction){ return '<div class="nav"><button class="btn primary
 
 function stepBody(step,s){
   switch(step.k){
-    case 'req': return say('先看左邊這筆合作需求，了解案主想做什麼。','了解「'+SC.client+'」想邀 KOL 做 Podcast 新品推廣，狀態是「已送件」。')+navRow(false);
-    case 'review': return say('這筆需求要先進審核。點「開始審核」。','需求狀態變成「審核中」。')+'<div class="actions">'+btn('開始審核','primary','review')+'</div>'+'<p class="hint" data-h="review"></p>'+navRow(true);
-    case 'approve': return say('內容沒問題，點「核准」把它轉成一個正式合作專案。','需求變「已核准（已轉專案）」，媒合開始於「候選人」。')+'<div class="actions">'+btn('核准並轉為專案','primary','approve')+'</div>'+'<p class="hint" data-h="approve"></p>'+navRow(true);
+    case 'req': return say('看左邊這筆合作需求——看的當下就是在審核。看完覺得內容沒問題，就按「下一步」去做核准／婉拒的決定。','了解「'+SC.client+'」想邀 KOL 做 Podcast 新品推廣，狀態是「已送件」。')+navRow(false);
+    case 'approve': var ad=actionDone('approve',s); return say('內容沒問題，點「核准」把它轉成一個正式合作專案。','需求變「已核准（已轉專案）」，媒合開始於「候選人」。')+'<div class="actions">'+btn('核准並轉為專案','primary','approve',ad)+'</div>'+'<p class="hint" data-h="approve">'+(ad?'已核准並轉成專案，開始媒合。':'')+'</p>'+navRow(!ad);
     case 'cand': return say('看一下三位候選 KOL，我們這次選定「'+SC.selected+'」。','候選名單：'+SC.candidates.map(function(c){return c.n;}).join('、')+'。')+'<ul class="cand">'+SC.candidates.map(function(c){return '<li'+(c.n===SC.selected?' class="sel"':'')+'><b>'+esc(c.n)+'</b><span>'+esc(c.d)+(c.n===SC.selected?' · 已選定':'')+'</span></li>';}).join('')+'</ul>'+navRow(false);
-    case 'draft': return say('替選定的 KOL 建立一封邀約草稿。','媒合狀態變成「邀約草稿」。')+'<div class="actions">'+btn('建立邀約草稿','primary','draft')+'</div>'+'<p class="hint" data-h="draft"></p>'+navRow(true);
-    case 'send': return say('邀約是「人工寄送」：可先複製內容或開啟 Email（這兩個不會改狀態），實際寄出後再點「模擬確認已完成寄送」。','點「模擬確認已完成寄送」後，邀約變「已寄出」、媒合變「已邀約」。')+'<div class="actions">'+btn('複製邀約內容','ghost','copy')+btn('開啟 Email','ghost','mailto')+btn('模擬確認已完成寄送','primary','dispatch')+'</div>'+'<p class="hint" data-h="send"></p>'+navRow(true);
-    case 'resp': return say('對方回覆了，這次請記錄「有意願」。','媒合變「有意願」。（提醒：已逾期／尚未回覆都不等於婉拒）')+'<div class="actions">'+btn('記錄：有意願','primary','interested')+btn('記錄：婉拒','guard','declined')+'</div>'+'<p class="hint" data-h="resp"></p>'+navRow(true);
-    case 'quote': return say('記錄這次的合作報價。','報價 NT$ '+SC.quote.toLocaleString()+' 已記錄，媒合變「已報價」。')+'<div class="actions"><span class="quote">測試報價：NT$ '+esc(SC.quote.toLocaleString())+'</span>'+btn('記錄報價','primary','quote')+'</div>'+'<p class="hint" data-h="quote"></p>'+navRow(true);
-    case 'nego': return say('進入洽談階段。','媒合變「洽談中」。')+'<div class="actions">'+btn('進入洽談','primary','nego')+'</div>'+'<p class="hint" data-h="nego"></p>'+navRow(true);
-    case 'confirm': return say('雙方談定，確認合作！','媒合變「已確認合作」，接著會看到「測試完成」。')+'<div class="actions">'+btn('確認合作','primary','confirm')+'</div>'+'<p class="hint" data-h="confirm"></p>'+navRow(true);
+    case 'draft': var dd=actionDone('draft',s); return say('替選定的 KOL 建立一封邀約草稿。','媒合狀態變成「邀約草稿」。')+'<div class="actions">'+btn('建立邀約草稿','primary','draft',dd)+'</div>'+'<p class="hint" data-h="draft">'+(dd?'邀約草稿已建立。':'')+'</p>'+navRow(!dd);
+    case 'send': var sd=actionDone('send',s); return say('邀約是「人工寄送」：可先複製內容或開啟 Email（這兩個不會改狀態），實際寄出後再點「模擬確認已完成寄送」。','點「模擬確認已完成寄送」後，邀約變「已寄出」、媒合變「已邀約」。')+'<div class="actions">'+btn('複製邀約內容','ghost','copy')+btn('開啟 Email','ghost','mailto')+btn('模擬確認已完成寄送','primary','dispatch',sd)+'</div>'+'<p class="hint" data-h="send">'+(sd?'已標記「已寄出」，媒合進到「已邀約」。':'')+'</p>'+navRow(!sd);
+    case 'resp': var rd=actionDone('resp',s); return say('對方回覆了，這次請記錄「有意願」。','媒合變「有意願」。（提醒：已逾期／尚未回覆都不等於婉拒）')+'<div class="actions">'+btn('記錄：有意願','primary','interested',rd)+btn('記錄：婉拒','guard','declined')+'</div>'+'<p class="hint" data-h="resp">'+(rd?'已記錄「有意願」。':'')+'</p>'+navRow(!rd);
+    case 'quote': var qd=actionDone('quote',s); return say('記錄這次的合作報價。','報價 NT$ '+SC.quote.toLocaleString()+' 已記錄，媒合變「已報價」。')+'<div class="actions"><span class="quote">測試報價：NT$ '+esc(SC.quote.toLocaleString())+'</span>'+btn('記錄報價','primary','quote',qd)+'</div>'+'<p class="hint" data-h="quote">'+(qd?'報價已記錄。':'')+'</p>'+navRow(!qd);
+    case 'nego': var nd=actionDone('nego',s); return say('進入洽談階段。','媒合變「洽談中」。')+'<div class="actions">'+btn('進入洽談','primary','nego',nd)+'</div>'+'<p class="hint" data-h="nego">'+(nd?'已進入洽談。':'')+'</p>'+navRow(!nd);
+    case 'confirm': var cd=actionDone('confirm',s); return say('雙方談定，確認合作！','媒合變「已確認合作」，接著會看到「測試完成」。')+'<div class="actions">'+btn('確認合作','primary','confirm',cd)+'</div>'+'<p class="hint" data-h="confirm">'+(cd?'已確認合作！':'')+'</p>'+navRow(!cd);
   }
   return '';
 }
@@ -191,7 +205,7 @@ function renderDone(s){
   $('#app').innerHTML = bannerHtml()+
     '<div class="card done"><div class="done-badge">✓</div><h2>測試完成，謝謝你！</h2>'+
     '<p class="done-sub">你剛完成了一次「合作推廣」從收到需求、審核核准，到邀約、報價、確認合作的完整流程。</p>'+
-    '<ul class="check">'+['查看需求','需求審核','核准轉專案','查看候選','建立邀約','模擬寄送','記錄回覆','報價','洽談','確認合作'].map(function(t){return '<li>✓ '+esc(t)+'</li>';}).join('')+'</ul>'+
+    '<ul class="check">'+['查看並審核需求','核准轉專案','查看候選','建立邀約','模擬寄送','記錄回覆','報價','洽談','確認合作'].map(function(t){return '<li>✓ '+esc(t)+'</li>';}).join('')+'</ul>'+
     '<div class="overall"><h3>整體感受（選填）</h3><label>整體使用下來，還有沒有什麼地方你覺得需要調整？</label><textarea data-a="overall" placeholder="想到什麼寫什麼，沒有也沒關係">'+esc(s.overall||'')+'</textarea>'+
     '<label>如果今天真的拿來工作，你最希望先改善哪一件事？</label><textarea data-a="priority" placeholder="一句話就好">'+esc(s.priority||'')+'</textarea></div>'+
     '<div class="summary"><div class="summary-head">你留下的回饋，已經幫你整理好了：</div><pre class="summary-pre" data-a="summary">'+esc(report)+'</pre></div>'+
@@ -219,7 +233,6 @@ function wire(step,s){
   function reflect(){var sc=$('.scenario');if(sc)sc.innerHTML=scenarioHtml(s);}
   switch(step.k){
     case 'req': case 'cand': break;
-    case 'review': on('review',function(){if(SIM.openReview(s).ok){save(s);done();reflect();this.disabled=true;setHint('review','已進入審核中。');}}); break;
     case 'approve': on('approve',function(){if(SIM.approve(s).ok){save(s);done();reflect();this.disabled=true;setHint('approve','已核准並轉成專案，開始媒合。');}}); break;
     case 'draft': on('draft',function(){if(SIM.createDraft(s).ok){save(s);done();reflect();this.disabled=true;setHint('draft','邀約草稿已建立。');}}); break;
     case 'send':
